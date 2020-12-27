@@ -1,45 +1,36 @@
 import * as React from 'react'
 
 const LoginForm = ({onSubmit, buttonText}) => {
-  const [formFields, setFormFields] = React.useState({userName: '', password: ''})
+  function handleSubmit(event) {
+    event.preventDefault()
+    const {username, password} = event.target.elements
+    onSubmit({
+      username: username.value,
+      password: password.value,
+    })
+  }
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="login-username">User name</label>
+        <label htmlFor="username">User name</label>
         <input
-          id="login-username"
+          id="username"
           type="text"
-          value={formFields.username}
-          onChange={event => {
-            setFormFields( {
-              ...formFields,
-              userName: event.target.value
-            })
-          }}
         />
       </div>
       <div>
-        <label htmlFor="login-password">Password</label>
+        <label htmlFor="password">Password</label>
         <input
-          id="login-password"
-          type="text"
-          value={formFields.password}
-          onChange={event => {
-            setFormFields( {
-              ...formFields,
-              password: event.target.value
-            })
-          }}
+          id="password"
+          type="password"
         />
       </div>
-      <button
-        onClick={event => {
-          event.preventDefault()
-          onSubmit(formFields)
-        } }
-      >
-        {buttonText}
-      </button>
+      <div>
+        <button type="submit">
+          {buttonText}
+        </button>
+      </div>
     </form>
   )
 }
