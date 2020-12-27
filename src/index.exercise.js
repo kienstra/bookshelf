@@ -7,8 +7,8 @@ import { RegisterButton } from 'components/register-button'
 function App() {
   return (
     <>
-      Bookshelf
       <Logo />
+      Bookshelf
       <LoginButton />
       <RegisterButton />
     </>
