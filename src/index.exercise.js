@@ -41,6 +41,7 @@ function App() {
           <VisuallyHidden>Close</VisuallyHidden>
           <span aria-hidden>×</span>
         </button>
+        <h1>Log in</h1>
         <LoginForm onSubmit={handleSubmit} buttonText="Login" />
       </Dialog>
       <Dialog
@@ -52,7 +53,8 @@ function App() {
           <VisuallyHidden>Close</VisuallyHidden>
           <span aria-hidden>×</span>
         </button>
-        <p>Please register</p>
+        <h1>Register</h1>
+        <LoginForm onSubmit={handleSubmit} buttonText="Register" />
       </Dialog>
     </>
   )
