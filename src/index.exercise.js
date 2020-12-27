@@ -6,6 +6,7 @@ import '@reach/dialog/styles.css';
 
 import {Logo} from 'components/logo'
 import {LoginButton} from 'components/login-button'
+import {LoginForm} from 'components/login-form'
 import { RegisterButton } from 'components/register-button'
 
 function App() {
@@ -17,6 +18,9 @@ function App() {
 
   const [openModal, setOpenModal] = React.useState(possibleOpenModals.none)
   const closeDialog = () => setOpenModal(possibleOpenModals.none)
+  function handleSubmit(formData) {
+    console.log('login', formData)
+  }
 
   return (
     <>
@@ -37,7 +41,7 @@ function App() {
           <VisuallyHidden>Close</VisuallyHidden>
           <span aria-hidden>×</span>
         </button>
-        <p>Please log in</p>
+        <LoginForm onSubmit={handleSubmit} buttonText="Login" />
       </Dialog>
       <Dialog
         isOpen={openModal === possibleOpenModals.register}
