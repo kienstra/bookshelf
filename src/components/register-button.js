@@ -1,8 +1,8 @@
 import * as React from 'react'
 
-const RegisterButton = () => {
+const RegisterButton = ({onClick}) => {
   return (
-    <button onClick={ () => console.log('Clicked register button')}>
+    <button onClick={onClick}>
       Register
     </button>
   )
