@@ -8,7 +8,7 @@ function App() {
   return (
     <>
       <Logo />
-      Bookshelf
+      <h1>Bookshelf</h1>
       <LoginButton />
       <RegisterButton />
     </>
