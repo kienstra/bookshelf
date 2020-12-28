@@ -79,6 +79,7 @@ function DiscoverBooksScreen() {
     )
 
     return () => {
+      console.log('About to reject')
       controller.abort()
     }
 
