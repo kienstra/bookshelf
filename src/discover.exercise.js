@@ -79,10 +79,8 @@ function DiscoverBooksScreen() {
     )
 
     return () => {
-      console.log('About to reject')
       controller.abort()
     }
-
   },[queried, state.query, stati.loading])
 
   function handleSearchSubmit(event) {
