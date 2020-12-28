@@ -13,6 +13,7 @@ const buttonVariants = {
     color: colors.text,
   }
 }
+
 const Button = styled.button(
   {
     padding: '10px 15px',
@@ -45,8 +46,8 @@ const CircleButton = styled.button({
   alignItems: 'center',
   justifyContent: 'center',
   background: 'white',
-  color: '#434449',
-  border: `1px solid #f1f1f4`,
+  color: colors.text,
+  border: `1px solid ${colors.gray10}`,
   cursor: 'pointer',
 })
 
