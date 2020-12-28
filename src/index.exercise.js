@@ -1,6 +1,6 @@
-import * as React from 'react'
 /** @jsx jsx */
 import {jsx} from '@emotion/core'
+import * as React from 'react'
 import 'bootstrap/dist/css/bootstrap-reboot.css'
 import '@reach/dialog/styles.css'
 import ReactDOM from 'react-dom'
@@ -33,7 +33,6 @@ function LoginForm({onSubmit, submitButton}) {
         },
       }}
     >
-      {/* 🐨 and the inputs elements could be custom styled Input components too */}
       <FormGroup>
         <div>
           <label htmlFor="username">Username</label>

@@ -1,14 +1,15 @@
 import styled from '@emotion/styled'
 import {Dialog as ReachDialog} from '@reach/dialog'
 
-const Button = styled.button(({variant}) => {
+const defaultVariant = 'primary'
+const Button = styled.button(({variant = defaultVariant}) => {
   return {
     padding: '10px 15px',
     border: '0',
     lineHeight: '1',
     borderRadius: '3px',
-    background: variant === 'secondary' ? '#f1f2f7' : '#3f51b5',
-    color: variant === 'secondary' ? '#434449' : 'white',
+    background: variant === defaultVariant ? '#3f51b5' : '#f1f2f7',
+    color: variant === defaultVariant ? 'white' : '#434449',
   }
 })
 
