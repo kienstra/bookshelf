@@ -57,7 +57,7 @@ const Dialog = styled(ReachDialog)({
   paddingBottom: '3.5em',
   boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.2)',
   margin: '20vh auto',
-  [mq.smal]: {
+  [mq.small]: {
     width: '100%',
     margin: '10vh auto',
   },
