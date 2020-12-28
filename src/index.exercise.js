@@ -34,16 +34,14 @@ function LoginForm({onSubmit, submitButton}) {
       }}
     >
       <FormGroup>
-        <div>
-          <label htmlFor="username">Username</label>
-          <Input id="username" />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <Input id="password" type="password" />
-        </div>
-        <div>{React.cloneElement(submitButton, {type: 'submit'})}</div>
+        <label htmlFor="username">Username</label>
+        <Input id="username" />
       </FormGroup>
+      <FormGroup>
+        <label htmlFor="password">Password</label>
+        <Input id="password" type="password" />
+      </FormGroup>
+      <div>{React.cloneElement(submitButton, {type: 'submit'})}</div>
     </form>
   )
 }
