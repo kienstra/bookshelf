@@ -7,7 +7,7 @@ import Tooltip from '@reach/tooltip'
 import {FaSearch} from 'react-icons/fa'
 import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
-// import client from './utils/api-client'
+import {client} from './utils/api-client'
 
 function DiscoverBooksScreen() {
   const stati = {
@@ -23,7 +23,6 @@ function DiscoverBooksScreen() {
         return {
           ...state,
           query: action.query,
-          queried: true,
         }
       case 'loading':
         return {
@@ -35,14 +34,14 @@ function DiscoverBooksScreen() {
           ...state,
           status: stati.success,
           data: action.data,
-          queried: false,
+          query: null,
         }
       case 'rejected':
         return {
           ...state,
           status: stati.rejected,
           data: action.data,
-          queried: false,
+          query: null,
         }
       default:
         throw new Error(`unsupported action.type passed to the reducer: ${action.type}`)
@@ -53,32 +52,22 @@ function DiscoverBooksScreen() {
     status: stati.idle,
     data: null,
     query: null,
-    queried: false,
   })
 
-  // 🐨 you'll also notice that we don't want to run the search until the
-  // user has submitted the form, so you'll need a boolean for that as well
-  // 💰 I called it "queried"
-
-  // 🐨 Add a useEffect callback here for making the request with the
-  // client and updating the status and data.
-  // 💰 Here's the endpoint you'll call: `books?query=${encodeURIComponent(query)}`
-  // 🐨 remember, effect callbacks are called on the initial render too
-  // so you'll want to check if the user has submitted the form yet and if
-  // they haven't then return early (💰 this is what the queried state is for).
+  const queried = state.query != null
   const isLoading = stati.loading === state.status
   const isSuccess = stati.success === state.status
 
   React.useEffect(() => {
-    if (!state.queried || !state.query) {
+    if (!queried) {
       return
     }
 
     const controller = new AbortController()
     dispatch({type: 'loading', status: stati.loading})
 
-    window.fetch(
-      `${process.env.REACT_APP_API_URL}/books?query=${encodeURIComponent(state.query)}`,
+    client(
+      `books?query=${encodeURIComponent(state.query)}`,
       {
         referrerPolicy: 'origin-when-cross-origin',
         signal: controller.signal,
@@ -86,15 +75,14 @@ function DiscoverBooksScreen() {
       }
     ).then(
       data => dispatch({type: 'success', data}),
-      error => dispatch({type: 'rejected', data: error}),
+      error => dispatch({type: 'rejected', data: error})
     )
 
     return () => {
-      console.log(`about to abort`)
       controller.abort()
     }
 
-  },[state.queried, state.query, stati.loading])
+  },[queried, state.query, stati.loading])
 
   function handleSearchSubmit(event) {
     event.preventDefault()

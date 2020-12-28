@@ -1,4 +1,11 @@
 function client(endpoint, customConfig = {}) {
+  return window.fetch(
+    `${process.env.REACT_APP_API_URL}/${endpoint}`,
+    {
+      method: 'GET',
+      ...customConfig,
+    }
+  )
   // 🐨 create the config you'll pass to window.fetch
   //    make the method default to "GET"
   // 💰 if you're confused by this, that's fine. Scroll down to the bottom
@@ -9,100 +16,3 @@ function client(endpoint, customConfig = {}) {
 }
 
 export {client}
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-💰 spoiler alert below...
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const config = {
-    method: 'GET',
-    ...customConfig,
-  }
-*/
