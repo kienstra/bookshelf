@@ -11,7 +11,10 @@ function App() {
 
   const login = form => auth.login(form).then(user => setUser(user))
   const register = form => auth.register(form).then(user => setUser(user))
-  const logout = () => auth.logout().then(() => setUser(null))
+  const logout = () => {
+    auth.logout()
+    setUser(null)
+  }
 
   return user
     ? <AuthenticatedApp user={user} logout={logout} />
