@@ -4,10 +4,14 @@ import {jsx} from '@emotion/core'
 import * as React from 'react'
 import * as auth from 'auth-provider'
 import {AuthenticatedApp} from './authenticated-app'
+import * as colors from 'styles/colors'
+import {FullPageSpinner} from 'components/lib'
 import {UnauthenticatedApp} from './unauthenticated-app'
 import {client} from 'utils/api-client'
+import {useAsync} from 'utils/hooks'
 
 function App() {
+  const {error, isError, isLoading, run} = useAsync()
   const [user, setUser] = React.useState(null)
 
   const login = form => auth.login(form).then(user => setUser(user))
@@ -27,13 +31,35 @@ function App() {
     return null;
   }
 
-  React.useEffect(() => {
-    getUser().then(user => setUser(user))
-  },[])
+  React.useLayoutEffect(() => {
+    run(getUser()).then(
+      user => setUser(user)
+    )
+  },[]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return user
-    ? <AuthenticatedApp user={user} logout={logout} />
-    : <UnauthenticatedApp login={login} register={register} />
+  if (isError) {
+    return (
+      <div
+        css={{
+          color: colors.danger,
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <p>Uh oh... There's a problem. Try refreshing the app.</p>
+        <pre>{error.message}</pre>
+      </div>
+    )
+  }
+
+  return isLoading
+    ? <FullPageSpinner />
+    : user
+      ? <AuthenticatedApp user={user} logout={logout} />
+      : <UnauthenticatedApp login={login} register={register} />
 }
 
 export {App}
