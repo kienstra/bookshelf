@@ -11,14 +11,22 @@ import {client} from 'utils/api-client'
 import {useAsync} from 'utils/hooks'
 
 function App() {
-  const {error, isError, isLoading, run} = useAsync()
-  const [user, setUser] = React.useState(null)
+  const {
+    data: user,
+    error,
+    isLoading,
+    isIdle,
+    isError,
+    isSuccess,
+    run,
+    setData
+  } = useAsync()
 
-  const login = form => auth.login(form).then(user => setUser(user))
-  const register = form => auth.register(form).then(user => setUser(user))
+  const login = form => auth.login(form).then(user => setData(user))
+  const register = form => auth.register(form).then(user => setData(user))
   const logout = () => {
     auth.logout()
-    setUser(null)
+    setData(null)
   }
 
   async function getUser() {
@@ -33,9 +41,13 @@ function App() {
 
   React.useLayoutEffect(() => {
     run(getUser()).then(
-      user => setUser(user)
+      user => setData(user)
     )
   },[]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (isLoading || isIdle) {
+    return <FullPageSpinner />
+  }
 
   if (isError) {
     return (
@@ -55,11 +67,11 @@ function App() {
     )
   }
 
-  return isLoading
-    ? <FullPageSpinner />
-    : user
+  if (isSuccess) {
+    return user
       ? <AuthenticatedApp user={user} logout={logout} />
       : <UnauthenticatedApp login={login} register={register} />
+  }
 }
 
 export {App}
