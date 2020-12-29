@@ -4,16 +4,18 @@ import * as React from 'react'
 
 import './bootstrap'
 import Tooltip from '@reach/tooltip'
-import {FaSearch} from 'react-icons/fa'
+import {FaSearch, FaTimes} from 'react-icons/fa'
 import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
 import {client} from './utils/api-client'
+import * as colors from 'styles/colors'
 
 function DiscoverBooksScreen() {
+  const searchId = 'search'
   const stati = {
+    error: 'error',
     idle: 'idle',
     loading: 'loading',
-    rejected: 'rejected',
     success: 'succes',
   }
 
@@ -36,11 +38,12 @@ function DiscoverBooksScreen() {
           data: action.data,
           query: null,
         }
-      case 'rejected':
+      case 'error':
         return {
           ...state,
-          status: stati.rejected,
-          data: action.data,
+          status: stati.error,
+          error: action.error,
+          data: null,
           query: null,
         }
       default:
@@ -52,11 +55,13 @@ function DiscoverBooksScreen() {
     status: stati.idle,
     data: null,
     query: null,
+    error: null,
   })
 
   const queried = state.query != null
   const isLoading = stati.loading === state.status
   const isSuccess = stati.success === state.status
+  const isError = stati.error === state.status
 
   React.useEffect(() => {
     if (!queried) {
@@ -75,7 +80,7 @@ function DiscoverBooksScreen() {
       }
     ).then(
       data => dispatch({type: 'success', data}),
-      error => dispatch({type: 'rejected', data: error})
+      error => dispatch({type: 'error', error})
     )
 
     return () => {
@@ -87,7 +92,7 @@ function DiscoverBooksScreen() {
     event.preventDefault()
     dispatch({
       type: 'queried',
-      query: event.target.elements.search.value,
+      query: event.target.elements[searchId].value,
     })
   }
 
@@ -98,11 +103,11 @@ function DiscoverBooksScreen() {
       <form onSubmit={handleSearchSubmit}>
         <Input
           placeholder="Search books..."
-          id="search"
+          id={searchId}
           css={{width: '100%'}}
         />
         <Tooltip label="Search Books">
-          <label htmlFor="search">
+          <label htmlFor={searchId}>
             <button
               type="submit"
               css={{
@@ -112,11 +117,19 @@ function DiscoverBooksScreen() {
                 background: 'transparent',
               }}
             >
-              {isLoading ? <Spinner /> : <FaSearch aria-label="search" />}
+              {isLoading ? <Spinner /> : isError ? <FaTimes aria-label="error" css={{color: colors.danger}}/> : <FaSearch aria-label="search" />}
             </button>
           </label>
         </Tooltip>
       </form>
+
+      {isError ? (
+        <div css={{color: colors.danger}
+        }>
+        <p>There was an error:</p>
+        <pre>{state.error.message}</pre>
+        </div>
+      ) : null }
 
       {isSuccess ? (
         state.data?.books?.length ? (
