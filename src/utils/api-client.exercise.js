@@ -10,14 +10,20 @@ function client(endpoint, {headers: customHeaders, token, ...customConfig}) {
     }
   }
 
-  return window.fetch(`${apiURL}/${endpoint}`, config).then(async response => {
-    const data = await response.json()
-    if (response.ok) {
-      return data
-    } else {
-      return Promise.reject(data)
-    }
-  })
+  return window.fetch(`${apiURL}/${endpoint}`, config)
+    .then(async response => {
+      const data = await response.json()
+      if (response.ok) {
+        return data
+      } else {
+        return Promise.reject(data)
+      }
+    })
+    .catch(error => {
+      if (error.status === 401) {
+        return Promise.reject(error)
+      }
+    })
 }
 
 export {client}

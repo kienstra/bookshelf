@@ -32,13 +32,7 @@ function App() {
   async function getUser() {
     const token = await auth.getToken()
     if (token) {
-      const data = await client('me', {token}).catch(
-        () => {
-          logout()
-          window.location.assign(window.location)
-        }
-      )
-
+      const data = await client('me', {token})
       return data?.user
     }
 
@@ -46,9 +40,12 @@ function App() {
   }
 
   React.useLayoutEffect(() => {
-    run(getUser()).then(
-      user => setData(user)
-    )
+    run(getUser())
+      .then(user => setData(user) )
+      .catch(() => {
+        logout()
+        window.location.assign(window.location)
+      })
   },[]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading || isIdle) {
