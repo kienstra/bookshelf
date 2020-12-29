@@ -17,19 +17,18 @@ function App() {
     setUser(null)
   }
 
-  React.useEffect(() => {
-    async function getToken() {
-      const token = await auth.getToken()
-      if (token) {
-        client('me', {token}).then(data => {
-          setUser(data.user)
-          console.log(data.user)
-        })
-      } else {
-        setUser(null)
-      }
+  async function getUser() {
+    const token = await auth.getToken()
+    if (token) {
+      const data = await client('me', {token});
+      return data.user
     }
-    getToken()
+
+    return null;
+  }
+
+  React.useEffect(() => {
+    getUser().then(user => setUser(user))
   },[])
 
   return user
