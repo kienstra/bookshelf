@@ -167,7 +167,8 @@ You respond by palming your face 🤦‍♂️ and go back to the drawing board.
 ```javascript
 import {useAsync} from 'utils/hooks'
 
-const {data, error, run, isLoading, isError, isSuccess} = useAsync()
+
+
 
 // in an event handler/effect/wherever
 run(doSomethingThatReturnsAPromise())

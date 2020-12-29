@@ -13,90 +13,37 @@ import {useAsync} from 'utils/hooks'
 
 function DiscoverBooksScreen() {
   const searchId = 'search'
-  const stati = {
-    error: 'error',
-    idle: 'idle',
-    loading: 'loading',
-    success: 'succes',
-  }
-
-  function reducer(state, action) {
-
-    switch (action.type) {
-      case 'queried':
-        return {
-          ...state,
-          error: null,
-          query: action.query,
-        }
-      case 'loading':
-        return {
-          ...state,
-          status: stati.loading,
-        }
-      case 'success':
-        return {
-          status: stati.success,
-          data: action.data,
-          query: null,
-          error: null,
-        }
-      case 'error':
-        return {
-          status: stati.error,
-          error: action.error,
-          data: null,
-          query: null,
-        }
-      default:
-        throw new Error(`unsupported action.type passed to the reducer: ${action.type}`)
-    }
-  }
-
-  const [state, dispatch] = React.useReducer( reducer, {
-    status: stati.idle,
-    data: null,
-    query: null,
-    error: null,
-  })
-
+   const [query, setQuery] = React.useState(null)
   const {data, error, run, isLoading, isError, isSuccess} = useAsync({
     status: 'idle', data: null, error: null
   })
-  const queried = state.query != null
+
+  const queried = query != null
   React.useEffect(() => {
     if (!queried) {
       return
     }
 
     const controller = new AbortController()
-    dispatch({type: 'loading', status: stati.loading})
-
     run(
       client(
-        `books?query=${encodeURIComponent(state.query)}`,
+        `books?query=${encodeURIComponent(query)}`,
         {
           referrerPolicy: 'origin-when-cross-origin',
           signal: controller.signal,
           headers: {'Accept': 'application/json'},
         }
       )
-    ).then(
-      data => dispatch({type: 'success', data}),
-      error => dispatch({type: 'error', error})
     )
 
     return () => {
       controller.abort()
     }
-  },[queried, run, state.query, stati.loading])
+  },[queried, query, run])
 
   function handleSearchSubmit(event) {
     event.preventDefault()
-    dispatch({
-      type: 'queried',
-      query: event.target.elements[searchId].value,
-    })
+    setQuery(event.target.elements[searchId].value)
   }
 
   return (
