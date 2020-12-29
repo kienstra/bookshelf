@@ -21,10 +21,12 @@ function DiscoverBooksScreen() {
   }
 
   function reducer(state, action) {
+
     switch (action.type) {
       case 'queried':
         return {
           ...state,
+          error: null,
           query: action.query,
         }
       case 'loading':
@@ -34,14 +36,13 @@ function DiscoverBooksScreen() {
         }
       case 'success':
         return {
-          ...state,
           status: stati.success,
           data: action.data,
           query: null,
+          error: null,
         }
       case 'error':
         return {
-          ...state,
           status: stati.error,
           error: action.error,
           data: null,
@@ -52,7 +53,7 @@ function DiscoverBooksScreen() {
     }
   }
 
-  const [state, dispatch] = React.useReducer(reducer, {
+  const [state, dispatch] = React.useReducer( reducer, {
     status: stati.idle,
     data: null,
     query: null,
