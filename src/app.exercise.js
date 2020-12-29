@@ -32,8 +32,14 @@ function App() {
   async function getUser() {
     const token = await auth.getToken()
     if (token) {
-      const data = await client('me', {token});
-      return data.user
+      const data = await client('me', {token}).catch(
+        () => {
+          logout()
+          window.location.assign(window.location)
+        }
+      )
+
+      return data?.user
     }
 
     return null;
