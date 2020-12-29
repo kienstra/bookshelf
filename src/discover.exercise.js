@@ -9,6 +9,7 @@ import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
 import {client} from './utils/api-client'
 import * as colors from 'styles/colors'
+import {useAsync} from 'utils/hooks'
 
 function DiscoverBooksScreen() {
   const searchId = 'search'
@@ -58,11 +59,10 @@ function DiscoverBooksScreen() {
     error: null,
   })
 
+  const {data, error, run, isLoading, isError, isSuccess} = useAsync({
+    status: 'idle', data: null, error: null
+  })
   const queried = state.query != null
-  const isLoading = stati.loading === state.status
-  const isSuccess = stati.success === state.status
-  const isError = stati.error === state.status
-
   React.useEffect(() => {
     if (!queried) {
       return
@@ -71,13 +71,15 @@ function DiscoverBooksScreen() {
     const controller = new AbortController()
     dispatch({type: 'loading', status: stati.loading})
 
-    client(
-      `books?query=${encodeURIComponent(state.query)}`,
-      {
-        referrerPolicy: 'origin-when-cross-origin',
-        signal: controller.signal,
-        headers: {'Accept': 'application/json'},
-      }
+    run(
+      client(
+        `books?query=${encodeURIComponent(state.query)}`,
+        {
+          referrerPolicy: 'origin-when-cross-origin',
+          signal: controller.signal,
+          headers: {'Accept': 'application/json'},
+        }
+      )
     ).then(
       data => dispatch({type: 'success', data}),
       error => dispatch({type: 'error', error})
@@ -86,7 +88,7 @@ function DiscoverBooksScreen() {
     return () => {
       controller.abort()
     }
-  },[queried, state.query, stati.loading])
+  },[queried, run, state.query, stati.loading])
 
   function handleSearchSubmit(event) {
     event.preventDefault()
@@ -127,14 +129,14 @@ function DiscoverBooksScreen() {
         <div css={{color: colors.danger}
         }>
         <p>There was an error:</p>
-        <pre>{state.error.message}</pre>
+        <pre>{error.message}</pre>
         </div>
       ) : null }
 
       {isSuccess ? (
-        state.data?.books?.length ? (
+        data?.books?.length ? (
           <BookListUL css={{marginTop: 20}}>
-            {state.data.books.map(book => (
+            {data.books.map(book => (
               <li key={book.id} aria-label={book.title}>
                 <BookRow key={book.id} book={book} />
               </li>
