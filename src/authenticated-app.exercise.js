@@ -106,13 +106,15 @@ function Nav() {
   )
 }
 
-function AppRoutes({user}) {(
-  <Routes>
-    <Route path="/discover" element={<DiscoverBooksScreen user={user} />} />
-    <Route path="/book/:bookId" element={<BookScreen user={user} />} />
-    <Route path="*" element={<NotFoundScreen />} />
-  </Routes>
-)}
+function AppRoutes({user}) {
+  return (
+    <Routes>
+      <Route path="/discover" element={<DiscoverBooksScreen user={user} />} />
+      <Route path="/book/:bookId" element={<BookScreen user={user} />} />
+      <Route path="*" element={<NotFoundScreen />} />
+    </Routes>
+  )
+}
 
 export {AuthenticatedApp}
 
