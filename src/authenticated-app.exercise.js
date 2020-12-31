@@ -2,7 +2,7 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
-import {Routes, Route, Link} from 'react-router-dom'
+import {Routes, Route, Link, useMatch} from 'react-router-dom'
 import {Button} from './components/lib'
 import * as mq from './styles/media-queries'
 import * as colors from './styles/colors'
@@ -57,7 +57,8 @@ function AuthenticatedApp({user, logout}) {
 function NavLink(props) {
   return (
     <Link
-      css={{
+      css={[
+        {
         display: 'block',
         padding: '8px 15px 8px 10px',
         margin: '5px 0',
@@ -71,7 +72,17 @@ function NavLink(props) {
           textDecoration: 'none',
           background: colors.gray10,
         },
-      }}
+      },
+        useMatch(props.to)
+        ? {
+          borderLeft: `5px solid ${colors.indigo}`,
+          background: colors.gray10,
+          ':hover': {
+            background: colors.gray20,
+          },
+        }
+        : {}
+    ]}
       {...props}
     />
   )
@@ -99,7 +110,9 @@ function Nav() {
         }}
       >
         <li>
-          <NavLink to="/discover">Discover</NavLink>
+          <NavLink to="/discover">
+            Discover
+          </NavLink>
         </li>
       </ul>
     </nav>
