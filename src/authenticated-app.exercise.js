@@ -73,7 +73,7 @@ function NavLink(props) {
           background: colors.gray10,
         },
       },
-        useMatch(props.to)
+      useMatch(props.to)
         ? {
           borderLeft: `5px solid ${colors.indigo}`,
           background: colors.gray10,
