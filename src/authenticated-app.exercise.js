@@ -7,7 +7,7 @@ import {Button} from './components/lib'
 import * as mq from './styles/media-queries'
 import * as colors from './styles/colors'
 import {BookScreen} from 'screens/book'
-import {DiscoverBooksScreen} from 'screens/disover'
+import {DiscoverBooksScreen} from 'screens/discover'
 import {NotFoundScreen} from 'screens/not-found'
 
 function AuthenticatedApp({user, logout}) {
@@ -106,22 +106,13 @@ function Nav() {
   )
 }
 
-function AppRoutes({user}) {
-  // 🐨 Return all the routes here.
-  // 💰 Here's the mapping of URL to element:
-  //     /discover         <DiscoverBooksScreen user={user} />
-  //     /book/:bookId     <BookScreen user={user} />
-  //     *                 <NotFoundScreen />
-  //
-  // Make sure to check the INSTRUCTIONS.md for how this should be structured
-  return (
-    <Routes>
-      <Route path="/discover" element={<DiscoverBooksScreen user={user} />} />
-      <Route path="/book:bookId" element={<BookScreen user={user} />} />
-      <Route path="*" element={<NotFoundScreen />} />
-    </Routes>
-  )
-}
+function AppRoutes({user}) {(
+  <Routes>
+    <Route path="/discover" element={<DiscoverBooksScreen user={user} />} />
+    <Route path="/book/:bookId" element={<BookScreen user={user} />} />
+    <Route path="*" element={<NotFoundScreen />} />
+  </Routes>
+)}
 
 export {AuthenticatedApp}
 
