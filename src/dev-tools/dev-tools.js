@@ -182,7 +182,6 @@ function install() {
                   <RequestFailUI />
                 </TabPanel>
                 <TabPanel>
-                  <ReactQueryDevtoolsPanel />
                 </TabPanel>
               </TabPanels>
             </Tabs>
