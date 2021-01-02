@@ -22,10 +22,8 @@ function Rating({listItem, user}) {
   const [isTabbing, setIsTabbing] = React.useState(false)
   const queryClient = useQueryClient()
   const {mutate: update} = useMutation(
-    (data) => {
-      client(`list-items/${data.id}`, {data, token: user.token, method: 'PUT'})
-      queryClient.invalidateQueries('list-items', {onSettled: true})
-    }
+    data => client(`list-items/${data.id}`, {data, token: user.token, method: 'PUT'}),
+    {onSettled: () => queryClient.invalidateQueries('list-items')}
   )
 
   React.useEffect(() => {

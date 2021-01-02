@@ -20,7 +20,7 @@ function ListItemList({
     }
   )
 
-  const filteredListItems = Array.isArray(listItems) ? listItems.filter(filterListItems) : null
+  const filteredListItems = listItems?.filter(filterListItems) ?? null
 
   if (!listItems?.length) {
     return <div css={{marginTop: '1em', fontSize: '1.2em'}}>{noListItems}</div>

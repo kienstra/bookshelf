@@ -20,9 +20,7 @@ function BookRow({user, book}) {
     }
   )
 
-  const listItem = Array.isArray( listItems )
-    ? listItems.find(item => item.bookId === book.id)
-    : null
+  const listItem = listItems?.find(item => item.bookId === book.id) ?? null
   const id = `book-row-book-${book.id}`
 
   return (

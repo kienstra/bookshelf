@@ -51,39 +51,26 @@ function StatusButtons({user, book}) {
   const queryClient = useQueryClient()
   const {data: listItems} = useQuery(
     'list-items',
-    () => {
-      return client('list-items', {token: user.token})
-        .then(data => data.listItems)
-    }
+    () => client('list-items', {token: user.token}).then(data => data.listItems)
   )
 
-  const listItem = Array.isArray( listItems )
-    ? listItems.find(item => item.bookId === book.id)
-    : null
+  const listItem = listItems?.find(item => item.bookId === book.id) ?? null
+  const mutationConfig = {
+    onSettled: () => queryClient.invalidateQueries('list-items')
+  }
 
-  const invalidate = () => queryClient.invalidateQueries('list-items')
-
-  const mutationConfig = {onSettled: invalidate}
   const {mutate: update} = useMutation(
-    data => {
-      invalidate()
-      return client(`list-items/${data.id}`, {method: 'PUT', token: user.token, data})
-    },
+    data => client(`list-items/${data.id}`, {method: 'PUT', token: user.token, data}),
     mutationConfig
   )
 
-  // 🐨 call useMutation here and assign the mutate function to "remove"
-  // the mutate function should call the list-items/:listItemId endpoint with a DELETE
   const {mutate: remove} = useMutation(
-    data => client(`list-items/${data.id}`, {method: 'DELETE', token: user.token}),
+    ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
     mutationConfig
   )
 
-  // 🐨 call useMutation here and assign the mutate function to "create"
-  // the mutate function should call the list-items endpoint with a POST
-  // and the bookId the listItem is being created for.
   const {mutate: create} = useMutation(
-    () => client('list-items', {token: user.token, data: {bookId: book.id}}),
+    ({bookId}) => client('list-items', {token: user.token, data: {bookId}}),
     mutationConfig
   )
 
@@ -117,7 +104,7 @@ function StatusButtons({user, book}) {
         <TooltipButton
           label="Add to list"
           highlight={colors.indigo}
-          onClick={() => create()}
+          onClick={() => create({bookId: book.id})}
           icon={<FaPlusCircle />}
         />
       )}
