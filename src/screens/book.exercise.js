@@ -6,7 +6,7 @@ import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
 import {useParams} from 'react-router-dom'
-import {queryClient, useMutation, useQuery} from 'react-query'
+import {useMutation, useQuery, useQueryClient} from 'react-query'
 import {client} from 'utils/api-client'
 import {formatDate} from 'utils/misc'
 import * as mq from 'styles/media-queries'
@@ -27,9 +27,9 @@ const loadingBook = {
 
 function BookScreen({user}) {
   const {bookId} = useParams()
-  const {data} = useQuery(
+  const {data: book = loadingBook} = useQuery(
     ['book', {bookId}],
-    () => client(`books/${bookId}`, {token: user.token})
+    () => client(`books/${bookId}`, {token: user.token}).then(data => data.book)
   )
 
   const {data: listItems} = useQuery(
@@ -40,7 +40,6 @@ function BookScreen({user}) {
     }
   )
 
-  const book = data?.book ?? loadingBook
   const listItem = listItems?.find(item => item.bookId === book.id) ?? null
   const {title, author, coverImageUrl, publisher, synopsis} = book
 
@@ -124,6 +123,7 @@ function ListItemTimeframe({listItem}) {
 }
 
 function NotesTextarea({listItem, user}) {
+  const queryClient = useQueryClient()
   const {mutate} = useMutation(
     data => client(`list-items/${data.id}`, {data, token: user.token, method: 'PUT'}),
     {onSettled: () => queryClient.invalidateQueries('list-items')}
