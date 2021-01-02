@@ -10,9 +10,10 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
-import {useQuery, useQueryClient, useMutation} from 'react-query'
-import {client} from 'utils/api-client'
+import {useQueryClient} from 'react-query'
+import {useUpdateListItem, useRemoveListItem, useCreateListItem} from 'utils/list-items'
 import {useAsync} from 'utils/hooks'
+import {useListItem} from 'utils/list-items'
 import * as colors from 'styles/colors'
 import {CircleButton, Spinner} from './lib'
 
@@ -48,31 +49,10 @@ function TooltipButton({label, highlight, onClick, icon, ...rest}) {
 }
 
 function StatusButtons({user, book}) {
-  const queryClient = useQueryClient()
-  const {data: listItems} = useQuery(
-    'list-items',
-    () => client('list-items', {token: user.token}).then(data => data.listItems)
-  )
-
-  const listItem = listItems?.find(item => item.bookId === book.id) ?? null
-  const mutationConfig = {
-    onSettled: () => queryClient.invalidateQueries('list-items')
-  }
-
-  const {mutate: update} = useMutation(
-    data => client(`list-items/${data.id}`, {method: 'PUT', token: user.token, data}),
-    mutationConfig
-  )
-
-  const {mutate: remove} = useMutation(
-    ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
-    mutationConfig
-  )
-
-  const {mutate: create} = useMutation(
-    ({bookId}) => client('list-items', {token: user.token, data: {bookId}}),
-    mutationConfig
-  )
+  const listItem = useListItem(user, book.id)
+  const update = useUpdateListItem(user)
+  const remove = useRemoveListItem(user)
+  const create = useCreateListItem(user)
 
   return (
     <React.Fragment>

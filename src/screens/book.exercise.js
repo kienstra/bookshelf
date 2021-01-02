@@ -6,8 +6,10 @@ import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
 import {useParams} from 'react-router-dom'
-import {useMutation, useQuery, useQueryClient} from 'react-query'
+import {useMutation, useQueryClient} from 'react-query'
 import {client} from 'utils/api-client'
+import {useBook} from 'utils/books'
+import {useListItem} from 'utils/list-items'
 import {formatDate} from 'utils/misc'
 import * as mq from 'styles/media-queries'
 import * as colors from 'styles/colors'
@@ -27,20 +29,8 @@ const loadingBook = {
 
 function BookScreen({user}) {
   const {bookId} = useParams()
-  const {data: book = loadingBook} = useQuery(
-    ['book', {bookId}],
-    () => client(`books/${bookId}`, {token: user.token}).then(data => data.book)
-  )
-
-  const {data: listItems} = useQuery(
-    'list-items',
-    () => {
-      return client('list-items', {token: user.token})
-        .then(data => data.listItems)
-    }
-  )
-
-  const listItem = listItems?.find(item => item.bookId === book.id) ?? null
+  const book = useBook(bookId, user) ?? loadingBook
+  const listItem = useListItem(user, book.id)
   const {title, author, coverImageUrl, publisher, synopsis} = book
 
   return (
