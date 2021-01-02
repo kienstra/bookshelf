@@ -3,7 +3,7 @@ import {client} from 'utils/api-client'
 
 function useListItem(user, bookId) {
   const listItems = useListItems(user)
-  return listItems?.find(item => item.bookId === bookId) ?? null
+  return listItems.find(item => item.bookId === bookId) ?? null
 }
 
 function useListItems(user) {
@@ -15,7 +15,7 @@ function useListItems(user) {
     }
   )
 
-  return listItems
+  return listItems ?? []
 }
 
 function useUpdateListItem(user) {
