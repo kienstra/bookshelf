@@ -10,6 +10,11 @@ const queryClient = new QueryClient({
     queries: {
       useErrorBoundary: true,
       refetchOnWindowFocus: false,
+      retry(failureCount, error) {
+        if (error.status === 404) return false
+        if (failureCount > 2) return true
+        return false
+      }
     },
     mutations: {},
   },
