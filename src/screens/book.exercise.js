@@ -6,6 +6,7 @@ import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
 import {useParams} from 'react-router-dom'
+import {Spinner} from 'components/lib'
 import {useBook} from 'utils/books'
 import {useListItem, useUpdateListItem} from 'utils/list-items'
 import {formatDate} from 'utils/misc'
@@ -101,7 +102,7 @@ function ListItemTimeframe({listItem}) {
 }
 
 function NotesTextarea({listItem, user}) {
-  const {mutate: update, error, isError} = useUpdateListItem(user)
+  const {mutate: update, error, isError, isLoading} = useUpdateListItem(user)
   const debouncedMutate = React.useMemo(() => debounceFn(update, {wait: 300}), [
     update,
   ])
@@ -125,6 +126,7 @@ function NotesTextarea({listItem, user}) {
         >
           Notes
         </label>
+        {isLoading ? <Spinner /> : null}
         {
           isError ? (
             <ErrorMessage

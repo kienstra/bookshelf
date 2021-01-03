@@ -21,7 +21,7 @@ function useListItems(user) {
 function useUpdateListItem(user, options = {}) {
   const queryClient = useQueryClient()
   return useMutation(
-    data => client(`list-itemsi/${data.id}`, {method: 'PUT', token: user.token, data}),
+    data => client(`list-items/${data.id}`, {method: 'PUT', token: user.token, data}),
     {
       onSettled: () => queryClient.invalidateQueries('list-items'),
       ...options,
