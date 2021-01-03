@@ -112,15 +112,6 @@ function NotesTextarea({listItem, user}) {
 
   return (
     <React.Fragment>
-      {
-        isError ? (
-          <ErrorMessage
-            error={error}
-            variant="inline"
-            css={{marginLeft: 6, fontSize: '0.7em'}}
-          />
-        ) : null
-      }
       <div>
         <label
           htmlFor="notes"
@@ -134,6 +125,15 @@ function NotesTextarea({listItem, user}) {
         >
           Notes
         </label>
+        {
+          isError ? (
+            <ErrorMessage
+              error={error}
+              variant="inline"
+              css={{marginLeft: 6, fontSize: '0.7em'}}
+            />
+          ) : null
+        }
       </div>
       <Textarea
         id="notes"
