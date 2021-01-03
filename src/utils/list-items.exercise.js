@@ -18,34 +18,37 @@ function useListItems(user) {
   return listItems ?? []
 }
 
-function useUpdateListItem(user) {
+function useUpdateListItem(user, options = {}) {
   const queryClient = useQueryClient()
-  const {mutate} = useMutation(
-    data => client(`list-items/${data.id}`, {method: 'PUT', token: user.token, data}),
-    { onSettled: () => queryClient.invalidateQueries('list-items') }
+  return useMutation(
+    data => client(`list-itemsi/${data.id}`, {method: 'PUT', token: user.token, data}),
+    {
+      onSettled: () => queryClient.invalidateQueries('list-items'),
+      ...options,
+    }
   )
-
-  return mutate
 }
 
-function useRemoveListItem(user) {
+function useRemoveListItem(user, options = {}) {
   const queryClient = useQueryClient()
-  const {mutate} = useMutation(
+  return useMutation(
     ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
-    { onSettled: () => queryClient.invalidateQueries('list-items') }
+    {
+      onSettled: () => queryClient.invalidateQueries('list-items'),
+      ...options
+    }
   )
-
-  return mutate
 }
 
-function useCreateListItem(user) {
+function useCreateListItem(user, options = {}) {
   const queryClient = useQueryClient()
-  const {mutate} = useMutation(
+  return useMutation(
     ({bookId}) => client('list-items', {token: user.token, data: {bookId}}),
-    { onSettled: () => queryClient.invalidateQueries('list-items') }
+    {
+      onSettled: () => queryClient.invalidateQueries('list-items'),
+      ...options
+    }
   )
-
-  return mutate
 }
 
 export {useCreateListItem, useListItem, useListItems, useRemoveListItem, useUpdateListItem}

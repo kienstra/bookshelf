@@ -6,14 +6,12 @@ import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
 import {useParams} from 'react-router-dom'
-import {useMutation, useQueryClient} from 'react-query'
-import {client} from 'utils/api-client'
 import {useBook} from 'utils/books'
-import {useListItem} from 'utils/list-items'
+import {useListItem, useUpdateListItem} from 'utils/list-items'
 import {formatDate} from 'utils/misc'
 import * as mq from 'styles/media-queries'
 import * as colors from 'styles/colors'
-import {Textarea} from 'components/lib'
+import {ErrorMessage, Textarea} from 'components/lib'
 import {Rating} from 'components/rating'
 import {StatusButtons} from 'components/status-buttons'
 
@@ -103,13 +101,9 @@ function ListItemTimeframe({listItem}) {
 }
 
 function NotesTextarea({listItem, user}) {
-  const queryClient = useQueryClient()
-  const {mutate} = useMutation(
-    data => client(`list-items/${data.id}`, {data, token: user.token, method: 'PUT'}),
-    {onSettled: () => queryClient.invalidateQueries('list-items')}
-  )
-  const debouncedMutate = React.useMemo(() => debounceFn(mutate, {wait: 300}), [
-    mutate,
+  const {mutate: update, error, isError} = useUpdateListItem(user)
+  const debouncedMutate = React.useMemo(() => debounceFn(update, {wait: 300}), [
+    update,
   ])
 
   function handleNotesChange(e) {
@@ -118,6 +112,15 @@ function NotesTextarea({listItem, user}) {
 
   return (
     <React.Fragment>
+      {
+        isError ? (
+          <ErrorMessage
+            error={error}
+            variant="inline"
+            css={{marginLeft: 6, fontSize: '0.7em'}}
+          />
+        ) : null
+      }
       <div>
         <label
           htmlFor="notes"
