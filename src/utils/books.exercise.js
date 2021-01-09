@@ -26,19 +26,19 @@ const loadingBooks = Array.from({length: 10}, (v, index) => ({
   ...loadingBook,
 }))
 
-function getQueryForBooks(user, query) {
-  return () => {
-    return client(`books?query=${encodeURIComponent(query)}`, {
-      token: user.token,
-    }).then(data => data.books)
-  }
+function getBookSearchConfig(user, query) {
+  return [
+    ['bookSearch', {query}],
+    () => {
+      return client(`books?query=${encodeURIComponent(query)}`, {
+        token: user.token,
+      }).then(data => data.books)
+    }
+  ]
 }
 
 function useBookSearch(query, user) {
-  const result = useQuery(
-    ['bookSearch', {query}],
-    getQueryForBooks(user, query)
-  )
+  const result = useQuery(...getBookSearchConfig(user, query))
 
   return {...result, books: result.data ?? loadingBooks}
 }
@@ -47,11 +47,8 @@ function useBookRefetch(user) {
   const queryClient = useQueryClient()
 
   const refetchBookSearchQuery = React.useCallback( () => {
-    queryClient.prefetchQuery(
-      ['bookSearch', {query: ''}],
-      getQueryForBooks(user, '')
-    )
-    queryClient.removeQueries()
+    queryClient.removeQueries('bookSearch')
+    queryClient.prefetchQuery(...getBookSearchConfig(user, ''))
   }, [queryClient, user] )
 
   return {refetchBookSearchQuery}
