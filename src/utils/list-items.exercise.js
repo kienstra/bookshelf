@@ -9,11 +9,19 @@ function useListItem(user, bookId) {
 }
 
 function useListItems(user) {
+  const queryClient = useQueryClient()
   const {data: listItems} = useQuery(
     queryKey,
     () => {
       return client('list-items', {token: user.token})
         .then(data => data.listItems)
+    },
+    {
+      onSuccess(items) {
+        for (const item of items) {
+          queryClient.setQueryData(['book', {bookId: item.bookId}], item.book)
+        }
+      }
     }
   )
 
