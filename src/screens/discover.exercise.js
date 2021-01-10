@@ -2,6 +2,7 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
+import {useQueryClient} from 'react-query'
 import Tooltip from '@reach/tooltip'
 import {FaSearch, FaTimes} from 'react-icons/fa'
 import {useBookRefetch, useBookSearch} from 'utils/books'
@@ -14,6 +15,7 @@ function DiscoverBooksScreen({user}) {
   const [queried, setQueried] = React.useState(false)
   const {books, error, isLoading, isError, isSuccess} = useBookSearch(query, user)
   const {refetchBookSearchQuery} = useBookRefetch(user)
+  const queryClient = useQueryClient()
 
   function handleSearchSubmit(event) {
     event.preventDefault()
@@ -22,8 +24,8 @@ function DiscoverBooksScreen({user}) {
   }
 
   React.useEffect( () => {
-    return () => refetchBookSearchQuery()
-  }, [refetchBookSearchQuery] )
+    return () => refetchBookSearchQuery(queryClient)
+  }, [queryClient, refetchBookSearchQuery] )
 
   return (
     <div>

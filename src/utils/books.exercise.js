@@ -26,6 +26,10 @@ const loadingBooks = Array.from({length: 10}, (v, index) => ({
   ...loadingBook,
 }))
 
+function setQueryDataForBook(book, queryClient) {
+  queryClient.setQueryData(['book', {bookId: book.id}], book)
+}
+
 function getBookSearchConfig(user, query, queryClient) {
   return [
     ['bookSearch', {query}],
@@ -36,9 +40,9 @@ function getBookSearchConfig(user, query, queryClient) {
     },
     {
       onSuccess(books) {
-        for (const book of books) {
-          queryClient.setQueryData(['book', {bookId: book.id}], book)
-        }
+        books.forEach( book => {
+          setQueryDataForBook(book, queryClient)
+        })
       }
     }
   ]
