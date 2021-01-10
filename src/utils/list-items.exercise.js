@@ -4,6 +4,14 @@ import { setQueryDataForBook } from './books.extra-6'
 
 const queryKey = 'list-items'
 
+const getDefaultMutationOptions = (queryClient) => ({
+  onError: (err, newListItems, recover) => {
+    if (typeof recover === 'function')
+    recover()
+  },
+  onSettled: () => queryClient.invalidateQueries(queryKey),
+})
+
 function useListItem(user, bookId) {
   const listItems = useListItems(user)
   return listItems.find(item => item.bookId === bookId) ?? null
@@ -49,10 +57,7 @@ function useUpdateListItem(user, options = {}) {
 
         return () => queryClient.setQueryData(queryKey, previousListItems)
       },
-      onError: (err, newListItems, recover) => {
-        recover()
-      },
-      onSettled: () => queryClient.invalidateQueries(queryKey),
+      ...getDefaultMutationOptions(queryClient),
       ...options,
     }
   )
@@ -76,10 +81,7 @@ function useRemoveListItem(user, options = {}) {
 
         return () => queryClient.setQueryData(queryKey, previousListItems)
       },
-      onError: (err, newListItems, recover) => {
-        recover()
-      },
-      onSettled: () => queryClient.invalidateQueries(queryKey),
+      ...getDefaultMutationOptions(queryClient),
       ...options
     }
   )
@@ -101,10 +103,7 @@ function useCreateListItem(user, options = {}) {
 
         return () => queryClient.setQueryData(queryKey, previousListItems)
       },
-      onError: (err, newListItems, recover) => {
-        recover()
-      },
-      onSettled: () => queryClient.invalidateQueries(queryKey),
+      ...getDefaultMutationOptions(queryClient),
       ...options
     }
   )
