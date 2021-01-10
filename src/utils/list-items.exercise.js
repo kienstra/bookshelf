@@ -55,6 +55,22 @@ function useRemoveListItem(user, options = {}) {
   return useMutation(
     ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
     {
+      onMutate: async newItem => {
+        await queryClient.cancelQueries(queryKey)
+        const previousListItems = queryClient.getQueryData(queryKey)
+
+        const newListItems = previousListItems.filter(removedItem => {
+          return removedItem.id !== newItem.id
+        })
+
+        // Optimistic update.
+        queryClient.setQueryData(queryKey, () => newListItems)
+
+        return {previousListItems}
+      },
+      onError: (err, newListItems, context) => {
+        queryClient.setQueryData(queryKey, context.previousListItems)
+      },
       onSettled: () => queryClient.invalidateQueries(queryKey),
       ...options
     }
@@ -66,6 +82,20 @@ function useCreateListItem(user, options = {}) {
   return useMutation(
     ({bookId}) => client('list-items', {token: user.token, data: {bookId}}),
     {
+      onMutate: async newItem => {
+        await queryClient.cancelQueries(queryKey)
+        const previousListItems = queryClient.getQueryData(queryKey)
+
+        const newListItems = [...previousListItems, newItem]
+
+        // Optimistic update.
+        queryClient.setQueryData(queryKey, () => newListItems)
+
+        return {previousListItems}
+      },
+      onError: (err, newListItems, context) => {
+        queryClient.setQueryData(queryKey, context.previousListItems)
+      },
       onSettled: () => queryClient.invalidateQueries(queryKey),
       ...options
     }
