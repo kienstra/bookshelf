@@ -68,14 +68,14 @@ function useRemoveListItem(user, options = {}) {
   return useMutation(
     ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
     {
-      onMutate: async newItem => {
-        await queryClient.cancelQueries(queryKey)
+      onMutate: removedItem => {
+        queryClient.cancelQueries(queryKey)
         const previousListItems = queryClient.getQueryData(queryKey)
 
         // Optimistic update.
         queryClient.setQueryData(queryKey, previousListItems => {
-          return previousListItems.filter(removedItem => {
-            return removedItem.id !== newItem.id
+          return previousListItems.filter(previousItem => {
+            return removedItem.id !== previousItem.id
           })
         })
 
