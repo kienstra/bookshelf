@@ -20,7 +20,9 @@ function useListItems(user) {
     {
       onSuccess(items) {
         items.forEach( item => {
-          setQueryDataForBook(item.book, queryClient)
+          if (item.book) {
+            setQueryDataForBook(item.book, queryClient)
+          }
         })
       }
     }
@@ -38,20 +40,17 @@ function useUpdateListItem(user, options = {}) {
         await queryClient.cancelQueries(queryKey)
         const previousListItems = queryClient.getQueryData(queryKey)
 
-        const newListItems = previousListItems.map(listItem => {
-          if (listItem.id === newItem.id) {
-            return {...listItem, ...newItem}
-          }
-          return listItem
+        // Optimistic update.
+        queryClient.setQueryData(queryKey, previousListItems => {
+          return previousListItems.map(listItem => {
+            return listItem.id === newItem.id ? {...listItem, ...newItem} : listItem
+          })
         })
 
-        // Optimistic update.
-        queryClient.setQueryData(queryKey, () => newListItems)
-
-        return {previousListItems}
+        return () => queryClient.setQueryData(queryKey, previousListItems)
       },
-      onError: (err, newListItems, context) => {
-        queryClient.setQueryData(queryKey, context.previousListItems)
+      onError: (err, newListItems, recover) => {
+        recover()
       },
       onSettled: () => queryClient.invalidateQueries(queryKey),
       ...options,
@@ -68,17 +67,17 @@ function useRemoveListItem(user, options = {}) {
         await queryClient.cancelQueries(queryKey)
         const previousListItems = queryClient.getQueryData(queryKey)
 
-        const newListItems = previousListItems.filter(removedItem => {
-          return removedItem.id !== newItem.id
+        // Optimistic update.
+        queryClient.setQueryData(queryKey, previousListItems => {
+          return previousListItems.filter(removedItem => {
+            return removedItem.id !== newItem.id
+          })
         })
 
-        // Optimistic update.
-        queryClient.setQueryData(queryKey, () => newListItems)
-
-        return {previousListItems}
+        return () => queryClient.setQueryData(queryKey, previousListItems)
       },
-      onError: (err, newListItems, context) => {
-        queryClient.setQueryData(queryKey, context.previousListItems)
+      onError: (err, newListItems, recover) => {
+        recover()
       },
       onSettled: () => queryClient.invalidateQueries(queryKey),
       ...options
@@ -95,15 +94,15 @@ function useCreateListItem(user, options = {}) {
         await queryClient.cancelQueries(queryKey)
         const previousListItems = queryClient.getQueryData(queryKey)
 
-        const newListItems = [...previousListItems, newItem]
-
         // Optimistic update.
-        queryClient.setQueryData(queryKey, () => newListItems)
+        queryClient.setQueryData(queryKey, previousListItems => {
+          return [...previousListItems, newItem]
+        })
 
-        return {previousListItems}
+        return () => queryClient.setQueryData(queryKey, previousListItems)
       },
-      onError: (err, newListItems, context) => {
-        queryClient.setQueryData(queryKey, context.previousListItems)
+      onError: (err, newListItems, recover) => {
+        recover()
       },
       onSettled: () => queryClient.invalidateQueries(queryKey),
       ...options
