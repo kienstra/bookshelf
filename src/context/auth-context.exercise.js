@@ -1,6 +1,8 @@
 import * as React from 'react'
 
 const AuthContext = React.createContext()
+AuthContext.display = 'AuthContext'
+
 const useAuth = () => {
   const context = React.useContext(AuthContext);
   if (context === undefined) {

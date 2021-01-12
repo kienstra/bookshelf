@@ -3,11 +3,10 @@ import {jsx} from '@emotion/core'
 
 import * as React from 'react'
 import * as auth from 'auth-provider'
-import {BrowserRouter as Router} from 'react-router-dom'
 import {FullPageSpinner, FullPageErrorFallback} from './components/lib'
 import {client} from './utils/api-client'
 import {useAsync} from './utils/hooks'
-import {AuthContext} from './context/auth-context'
+import {AppProviders} from './context'
 import {AuthenticatedApp} from './authenticated-app'
 import {UnauthenticatedApp} from './unauthenticated-app'
 
@@ -56,16 +55,12 @@ function App() {
 
   if (isSuccess) {
     return (
-      <AuthContext.Provider value={{user, login, register, logout}}>
-        { user ? (
-          <Router>
-            <AuthenticatedApp />
-          </Router>
-          ) : (
-            <UnauthenticatedApp />
-          )
+      <AppProviders authValue={{user, login, register, logout}}>
+        {user
+          ? <AuthenticatedApp />
+          : <UnauthenticatedApp />
         }
-      </AuthContext.Provider>
+      </AppProviders>
     )
   }
 }
