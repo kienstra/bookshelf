@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {BrowserRouter as Router} from 'react-router-dom'
 import {QueryClient, QueryClientProvider} from 'react-query'
-import {AuthContext} from 'context/auth-context'
+import {AuthProvider} from 'context/auth-context'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,14 +18,14 @@ const queryClient = new QueryClient({
   },
 })
 
-const AppProviders = ({children, authValue}) => {
+const AppProviders = ({children}) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={authValue}>
+      <AuthProvider>
         <Router>
           {children}
         </Router>
-      </AuthContext.Provider>
+      </AuthProvider>
     </QueryClientProvider>
   )
 }
