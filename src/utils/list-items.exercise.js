@@ -8,22 +8,23 @@ function useListItems() {
   const {user} = React.useContext(AuthContext)
   const queryClient = useQueryClient()
 
-  const {data} = useQuery({
-    queryKey: 'list-items',
-    queryFn: () =>
-      client(`list-items`, {token: user.token}).then(data => data.listItems),
-    onSuccess: async listItems => {
-      for (const listItem of listItems) {
-        setQueryDataForBook(listItem.book, queryClient)
-      }
+  const {data} = useQuery(
+    'list-items',
+    () => client(`list-items`, {token: user.token}).then(data => data.listItems),
+    {
+      onSuccess: async listItems => {
+        for (const listItem of listItems) {
+          setQueryDataForBook(listItem.book, queryClient)
+        }
+      },
     },
-  })
+  )
+
   return data ?? []
 }
 
 function useListItem(bookId) {
-  const {user} = React.useContext(AuthContext)
-  const listItems = useListItems(user)
+  const listItems = useListItems()
   return listItems.find(li => li.bookId === bookId) ?? null
 }
 
