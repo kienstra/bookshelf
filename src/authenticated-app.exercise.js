@@ -1,12 +1,13 @@
 /** @jsx jsx */
 import {jsx} from '@emotion/core'
 
+import * as React from 'react'
 import {Routes, Route, Link as RouterLink, useMatch} from 'react-router-dom'
 import {ErrorBoundary} from 'react-error-boundary'
 import {Button, ErrorMessage, FullPageErrorFallback} from './components/lib'
 import * as mq from './styles/media-queries'
 import * as colors from './styles/colors'
-// 🐨 get AuthContext from ./context/auth-context
+import {AuthContext} from './context/auth-context'
 import {ReadingListScreen} from './screens/reading-list'
 import {FinishedScreen} from './screens/finished'
 import {DiscoverBooksScreen} from './screens/discover'
@@ -28,10 +29,8 @@ function ErrorFallback({error}) {
   )
 }
 
-// you'll no longer receive the user object and logout function as props
-// 💣 remove the props
-function AuthenticatedApp({user, logout}) {
-  // 🐨 get user and logout function from AuthContext using useContext
+function AuthenticatedApp() {
+  const {logout, user} = React.useContext(AuthContext)
   return (
     <ErrorBoundary FallbackComponent={FullPageErrorFallback}>
       <div

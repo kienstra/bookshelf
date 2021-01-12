@@ -1,41 +1,42 @@
-// 🐨 we're going to use React hooks in here now so we'll need React
-import {useQuery, useMutation, queryCache} from 'react-query'
-// 🐨 get AuthContext from context/auth-context
+import * as React from 'react'
+import {useQuery, useMutation, useQueryClient} from 'react-query'
+import {AuthContext} from 'context/auth-context'
 import {setQueryDataForBook} from './books'
 import {client} from './api-client'
 
-// 💣 remove the user argument here
-function useListItems(user) {
-  // 🐨 get the user from React.useContext(AuthContext)
+function useListItems() {
+  const {user} = React.useContext(AuthContext)
+  const queryClient = useQueryClient()
+
   const {data} = useQuery({
     queryKey: 'list-items',
     queryFn: () =>
       client(`list-items`, {token: user.token}).then(data => data.listItems),
     onSuccess: async listItems => {
       for (const listItem of listItems) {
-        setQueryDataForBook(listItem.book)
+        setQueryDataForBook(listItem.book, queryClient)
       }
     },
   })
   return data ?? []
 }
 
-// 💣 remove the user argument here
-function useListItem(bookId, user) {
-  // 💣 you no longer need to pass the user here
+function useListItem(bookId) {
+  const {user} = React.useContext(AuthContext)
   const listItems = useListItems(user)
   return listItems.find(li => li.bookId === bookId) ?? null
 }
 
-const defaultMutationOptions = {
+const getDefaultMutationOptions = (queryClient) => ( {
   onError: (err, variables, recover) =>
     typeof recover === 'function' ? recover() : null,
-  onSettled: () => queryCache.invalidateQueries('list-items'),
-}
+  onSettled: () => queryClient.invalidateQueries('list-items'),
+} )
 
-// 💣 remove the user argument here
-function useUpdateListItem(user, options) {
-  // 🐨 get the user from React.useContext(AuthContext)
+function useUpdateListItem(options) {
+  const {user} = React.useContext(AuthContext)
+  const queryClient = useQueryClient()
+
   return useMutation(
     updates =>
       client(`list-items/${updates.id}`, {
@@ -45,49 +46,51 @@ function useUpdateListItem(user, options) {
       }),
     {
       onMutate(newItem) {
-        const previousItems = queryCache.getQueryData('list-items')
+        const previousItems = queryClient.getQueryData('list-items')
 
-        queryCache.setQueryData('list-items', old => {
+        queryClient.setQueryData('list-items', old => {
           return old.map(item => {
             return item.id === newItem.id ? {...item, ...newItem} : item
           })
         })
 
-        return () => queryCache.setQueryData('list-items', previousItems)
+        return () => queryClient.setQueryData('list-items', previousItems)
       },
-      ...defaultMutationOptions,
+      ...getDefaultMutationOptions(queryClient),
       ...options,
     },
   )
 }
 
-// 💣 remove the user argument here
-function useRemoveListItem(user, options) {
-  // 🐨 get the user from React.useContext(AuthContext)
+function useRemoveListItem(options) {
+  const {user} = React.useContext(AuthContext)
+  const queryClient = useQueryClient()
+
   return useMutation(
     ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
     {
       onMutate(removedItem) {
-        const previousItems = queryCache.getQueryData('list-items')
+        const previousItems = queryClient.getQueryData('list-items')
 
-        queryCache.setQueryData('list-items', old => {
+        queryClient.setQueryData('list-items', old => {
           return old.filter(item => item.id !== removedItem.id)
         })
 
-        return () => queryCache.setQueryData('list-items', previousItems)
+        return () => queryClient.setQueryData('list-items', previousItems)
       },
-      ...defaultMutationOptions,
+      ...getDefaultMutationOptions(queryClient),
       ...options,
     },
   )
 }
 
-// 💣 remove the user argument here
-function useCreateListItem(user, options) {
-  // 🐨 get the user from React.useContext(AuthContext)
+function useCreateListItem(options) {
+  const {user} = React.useContext(AuthContext)
+  const queryClient = useQueryClient()
+
   return useMutation(
     ({bookId}) => client(`list-items`, {data: {bookId}, token: user.token}),
-    {...defaultMutationOptions, ...options},
+    {...getDefaultMutationOptions(queryClient), ...options},
   )
 }
 

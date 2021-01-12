@@ -2,7 +2,7 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
-import {queryCache} from 'react-query'
+import {useQueryClient} from 'react-query'
 import * as auth from 'auth-provider'
 import {BrowserRouter as Router} from 'react-router-dom'
 import {FullPageSpinner} from './components/lib'
@@ -36,6 +36,7 @@ function App() {
     run,
     setData,
   } = useAsync()
+  const queryClient = useQueryClient()
 
   React.useEffect(() => {
     run(getUser())
@@ -45,7 +46,7 @@ function App() {
   const register = form => auth.register(form).then(user => setData(user))
   const logout = () => {
     auth.logout()
-    queryCache.clear()
+    queryClient.clear()
     setData(null)
   }
 

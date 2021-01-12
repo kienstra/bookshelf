@@ -1,26 +1,30 @@
-// 🐨 you don't need to do anything for the exercise, but there's an extra credit!
 import {loadDevTools} from './dev-tools/load'
 import './bootstrap'
 import * as React from 'react'
+import {QueryClient, QueryClientProvider} from 'react-query'
 import ReactDOM from 'react-dom'
-import {ReactQueryConfigProvider} from 'react-query'
 import {App} from './app'
 
-const queryConfig = {
-  retry(failureCount, error) {
-    if (error.status === 404) return false
-    else if (failureCount < 2) return true
-    else return false
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      useErrorBoundary: true,
+      refetchOnWindowFocus: false,
+      retry(failureCount, error) {
+        if (error.status === 404) return false
+        if (failureCount > 2) return true
+        return false
+      }
+    },
+    mutations: {},
   },
-  useErrorBoundary: true,
-  refetchAllOnWindowFocus: false,
-}
+})
 
 loadDevTools(() => {
   ReactDOM.render(
-    <ReactQueryConfigProvider config={queryConfig}>
+    <QueryClientProvider client={queryClient}>
       <App />
-    </ReactQueryConfigProvider>,
-    document.getElementById('root'),
+    </QueryClientProvider>,
+    document.getElementById('root')
   )
 })
