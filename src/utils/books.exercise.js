@@ -41,11 +41,11 @@ function useBookSearch(query) {
 }
 
 function useBook(bookId) {
-  const {authenticatedClient} = useClient()
+  const client = useClient()
   const {data} = useQuery({
     queryKey: ['book', {bookId}],
     queryFn: () =>
-      authenticatedClient(`books/${bookId}`).then(data => data.book),
+      client(`books/${bookId}`).then(data => data.book),
   })
   return data ?? loadingBook
 }

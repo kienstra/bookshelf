@@ -1,15 +1,14 @@
 import {useQuery, useMutation, useQueryClient} from 'react-query'
-import {useAuth, useClient} from 'context/auth-context'
+import {useClient} from 'context/auth-context'
 import {setQueryDataForBook} from './books'
-import {client} from './api-client'
 
 function useListItems() {
   const queryClient = useQueryClient()
-  const {authenticatedClient} = useClient()
+  const client = useClient()
 
   const {data} = useQuery(
     'list-items',
-    () => authenticatedClient(`list-items`).then(data => data.listItems),
+    () => client(`list-items`).then(data => data.listItems),
     {
       onSuccess: async listItems => {
         for (const listItem of listItems) {
@@ -34,12 +33,12 @@ const getDefaultMutationOptions = (queryClient) => ( {
 } )
 
 function useUpdateListItem(options) {
-  const {authenticatedClient} = useClient()
+  const client = useClient()
   const queryClient = useQueryClient()
 
   return useMutation(
     updates =>
-      authenticatedClient(`list-items/${updates.id}`, {
+      client(`list-items/${updates.id}`, {
         method: 'PUT',
         data: updates,
       }),
@@ -62,11 +61,11 @@ function useUpdateListItem(options) {
 }
 
 function useRemoveListItem(options) {
-  const {authenticatedClient} = useClient()
+  const client = useClient()
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({id}) => authenticatedClient(`list-items/${id}`, {method: 'DELETE'}),
+    ({id}) => client(`list-items/${id}`, {method: 'DELETE'}),
     {
       onMutate(removedItem) {
         const previousItems = queryClient.getQueryData('list-items')
@@ -84,11 +83,11 @@ function useRemoveListItem(options) {
 }
 
 function useCreateListItem(options) {
-  const {authenticatedClient} = useClient()
+  const client = useClient()
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({bookId}) => authenticatedClient(`list-items`, {data: {bookId}}),
+    ({bookId}) => client(`list-items`, {data: {bookId}}),
     {...getDefaultMutationOptions(queryClient), ...options},
   )
 }
