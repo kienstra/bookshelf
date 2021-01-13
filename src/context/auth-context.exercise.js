@@ -55,7 +55,7 @@ function AuthProvider(props) {
   }
 }
 
-const useAuth = () => {
+function useAuth() {
   const context = React.useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used inside AuthContext.Provider')
@@ -64,4 +64,14 @@ const useAuth = () => {
   return context
 }
 
-export {AuthProvider, useAuth}
+function useClient() {
+  const token = useAuth().user.token
+
+  const authenticatedClient = React.useCallback((endpoint, config) => {
+    return client(endpoint, {...config, token})
+  }, [token])
+
+  return {authenticatedClient}
+}
+
+export {AuthProvider, useAuth, useClient}

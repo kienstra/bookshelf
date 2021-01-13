@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {useQuery, useQueryClient} from 'react-query'
-import {useAuth} from 'context/auth-context'
+import {useAuth, useClient} from 'context/auth-context'
 import {client} from './api-client'
 import bookPlaceholderSvg from 'assets/book-placeholder.svg'
 
@@ -41,11 +41,11 @@ function useBookSearch(query) {
 }
 
 function useBook(bookId) {
-  const user = useAuth()
+  const {authenticatedClient} = useClient()
   const {data} = useQuery({
     queryKey: ['book', {bookId}],
     queryFn: () =>
-      client(`books/${bookId}`, {token: user.token}).then(data => data.book),
+      authenticatedClient(`books/${bookId}`).then(data => data.book),
   })
   return data ?? loadingBook
 }

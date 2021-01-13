@@ -1,15 +1,15 @@
 import {useQuery, useMutation, useQueryClient} from 'react-query'
-import {useAuth} from 'context/auth-context'
+import {useAuth, useClient} from 'context/auth-context'
 import {setQueryDataForBook} from './books'
 import {client} from './api-client'
 
 function useListItems() {
-  const {user} = useAuth()
   const queryClient = useQueryClient()
+  const {authenticatedClient} = useClient()
 
   const {data} = useQuery(
     'list-items',
-    () => client(`list-items`, {token: user.token}).then(data => data.listItems),
+    () => authenticatedClient(`list-items`).then(data => data.listItems),
     {
       onSuccess: async listItems => {
         for (const listItem of listItems) {
@@ -34,15 +34,14 @@ const getDefaultMutationOptions = (queryClient) => ( {
 } )
 
 function useUpdateListItem(options) {
-  const {user} = useAuth()
+  const {authenticatedClient} = useClient()
   const queryClient = useQueryClient()
 
   return useMutation(
     updates =>
-      client(`list-items/${updates.id}`, {
+      authenticatedClient(`list-items/${updates.id}`, {
         method: 'PUT',
         data: updates,
-        token: user.token,
       }),
     {
       onMutate(newItem) {
@@ -63,11 +62,11 @@ function useUpdateListItem(options) {
 }
 
 function useRemoveListItem(options) {
-  const {user} = useAuth()
+  const {authenticatedClient} = useClient()
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
+    ({id}) => authenticatedClient(`list-items/${id}`, {method: 'DELETE'}),
     {
       onMutate(removedItem) {
         const previousItems = queryClient.getQueryData('list-items')
@@ -85,11 +84,11 @@ function useRemoveListItem(options) {
 }
 
 function useCreateListItem(options) {
-  const {user} = useAuth()
+  const {authenticatedClient} = useClient()
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({bookId}) => client(`list-items`, {data: {bookId}, token: user.token}),
+    ({bookId}) => authenticatedClient(`list-items`, {data: {bookId}}),
     {...getDefaultMutationOptions(queryClient), ...options},
   )
 }
