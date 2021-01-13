@@ -1,7 +1,6 @@
 import * as React from 'react'
 import {useQuery, useQueryClient} from 'react-query'
-import {useAuth, useClient} from 'context/auth-context'
-import {client} from './api-client'
+import {useClient} from 'context/auth-context'
 import bookPlaceholderSvg from 'assets/book-placeholder.svg'
 
 const loadingBook = {
@@ -18,12 +17,11 @@ const loadingBooks = Array.from({length: 10}, (v, index) => ({
   ...loadingBook,
 }))
 
-const getBookSearchConfig = (query, user, queryClient) => ({
+const getBookSearchConfig = (query, client, queryClient) => ({
   queryKey: ['bookSearch', {query}],
   queryFn: () =>
-    client(`books?query=${encodeURIComponent(query)}`, {
-      token: user.token,
-    }).then(data => data.books),
+    client(`books?query=${encodeURIComponent(query)}`)
+      .then(data => data.books),
   config: {
     onSuccess(books) {
       for (const book of books) {
@@ -35,8 +33,8 @@ const getBookSearchConfig = (query, user, queryClient) => ({
 
 function useBookSearch(query) {
   const queryClient = useQueryClient()
-  const {user} = useAuth()
-  const result = useQuery(getBookSearchConfig(query, user, queryClient))
+  const client = useClient()
+  const result = useQuery(getBookSearchConfig(query, client, queryClient))
   return {...result, books: result.data ?? loadingBooks}
 }
 
@@ -51,13 +49,13 @@ function useBook(bookId) {
 }
 
 function useRefetchBookSearchQuery() {
-  const {user} = useAuth()
   const queryClient = useQueryClient()
+  const client = useClient()
 
   return React.useCallback(async () =>  {
     queryClient.removeQueries('bookSearch')
-    await queryClient.prefetchQuery(getBookSearchConfig('', user, queryClient))
-  }, [queryClient, user])
+    await queryClient.prefetchQuery(getBookSearchConfig('', client, queryClient))
+  }, [client, queryClient])
 }
 
 const bookQueryConfig = {
