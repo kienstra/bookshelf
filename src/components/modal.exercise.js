@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {Dialog} from './lib'
+
 const ModalContext = React.createContext()
 ModalContext.displayName = 'ModalContext'
 
@@ -14,19 +15,19 @@ function useModal() {
 
 function Modal(props) {
   const [isOpen, setIsOpen] = React.useState(false)
-  return <ModalContext.Provider value={{isOpen, setIsOpen}} {...props} />
+  return <ModalContext.Provider value={[isOpen, setIsOpen]} {...props} />
 }
 
-function ModalDismissButton({children}) {
-  const {setIsOpen} = useModal()
+function ModalDismissButton({children: child}) {
+  const [, setIsOpen] = useModal()
   return React.cloneElement(
-    children,
+    child,
     {onClick: () => setIsOpen(false)}
   )
 }
 
 function ModalOpenButton({children}) {
-  const {setIsOpen} = useModal()
+  const [, setIsOpen] = useModal()
   return React.cloneElement(
     children,
     {onClick: () => setIsOpen(true)}
@@ -34,16 +35,8 @@ function ModalOpenButton({children}) {
 }
 
 function ModalContents(props) {
-  const {isOpen, setIsOpen} = useModal()
-
-  return (
-    <Dialog
-      isOpen={isOpen}
-      onDismiss={() => setIsOpen(false)}
-      {...props}
-    >
-    </Dialog>
-  )
+  const [isOpen, setIsOpen] = useModal()
+  return <Dialog isOpen={isOpen} onDismiss={() => setIsOpen(false)} {...props} />
 }
 
-export {Modal, ModalDismissButton, ModalOpenButton, ModalContents}
+export {Modal, ModalContents, ModalDismissButton, ModalOpenButton}
