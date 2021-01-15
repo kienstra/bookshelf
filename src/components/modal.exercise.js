@@ -1,4 +1,9 @@
+/** @jsx jsx */
+import {jsx} from '@emotion/core'
+
 import * as React from 'react'
+import VisuallyHidden from '@reach/visually-hidden'
+import {CircleButton} from 'components/lib'
 import {Dialog} from './lib'
 
 const ModalContext = React.createContext()
@@ -36,9 +41,33 @@ function ModalOpenButton({children: child}) {
   )
 }
 
-function ModalContents(props) {
+const CircleDismissButton = () => (
+  <div css={{display: 'flex', justifyContent: 'flex-end'}}>
+    <ModalDismissButton>
+      <CircleButton>
+        <VisuallyHidden>Close</VisuallyHidden>
+        <span aria-hidden>×</span>
+      </CircleButton>
+    </ModalDismissButton>
+  </div>
+)
+
+
+const ModalContentsBase = ({title}) => (
+  <React.Fragment>
+    <CircleDismissButton />
+    <h3 css={{textAlign: 'center', fontSize: '2em'}}>{title}</h3>
+  </React.Fragment>
+)
+
+function ModalContents({title, children, ...props}) {
   const [isOpen, setIsOpen] = useModal()
-  return <Dialog isOpen={isOpen} onDismiss={() => setIsOpen(false)} {...props} />
+  return (
+    <Dialog isOpen={isOpen} onDismiss={() => setIsOpen(false)} {...props}>
+      <ModalContentsBase title={title} />
+      {children}
+    </Dialog>
+  )
 }
 
 export {Modal, ModalContents, ModalDismissButton, ModalOpenButton}
