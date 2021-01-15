@@ -4,6 +4,14 @@ import {Dialog} from './lib'
 const ModalContext = React.createContext()
 ModalContext.displayName = 'ModalContext'
 
+function callAll(event, fns) {
+  fns.forEach(fn => {
+    if (typeof fn === 'function') {
+      fn(event)
+    }
+  })
+}
+
 function useModal() {
   const context = React.useContext(ModalContext)
   if (context === undefined) {
@@ -22,15 +30,15 @@ function ModalDismissButton({children: child}) {
   const [, setIsOpen] = useModal()
   return React.cloneElement(
     child,
-    {onClick: () => setIsOpen(false)}
+    {onClick: event => callAll(event, [child.props.onClick, () => setIsOpen(false)])}
   )
 }
 
-function ModalOpenButton({children}) {
+function ModalOpenButton({children: child}) {
   const [, setIsOpen] = useModal()
   return React.cloneElement(
-    children,
-    {onClick: () => setIsOpen(true)}
+    child,
+    {onClick: event => callAll(event, [child.props.onClick, () => setIsOpen(true)])}
   )
 }
 
