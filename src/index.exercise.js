@@ -8,7 +8,7 @@ import {AppProviders} from './context'
 
 loadDevTools(() => {
   ReactDOM.render(
-    <Profiler id="AppProviders">
+    <Profiler id="AppProviders" phases={['mount']}>
       <AppProviders>
         <App />
       </AppProviders>
