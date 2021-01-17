@@ -45,19 +45,19 @@ function AuthProvider(props) {
   )
   const register = React.useCallback(
     form => auth.register(form).then(user => setData(user)),
-    [setData]
+    [setData],
   )
-  const logout = React.useCallback(
-    () => {
-      auth.logout()
-      setData(null)
-    },
-    [setData]
-  )
-  const value = React.useMemo(
-    () => ({user, login, register, logout}),
-    [login, logout, register, user]
-  )
+  const logout = React.useCallback(() => {
+    auth.logout()
+    setData(null)
+  }, [setData])
+
+  const value = React.useMemo(() => ({user, login, logout, register}), [
+    login,
+    logout,
+    register,
+    user,
+  ])
 
   if (isLoading || isIdle) {
     return <FullPageSpinner />
