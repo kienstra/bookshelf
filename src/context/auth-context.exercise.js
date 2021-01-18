@@ -21,6 +21,7 @@ async function getUser() {
 
 const AuthContext = React.createContext()
 AuthContext.displayName = 'AuthContext'
+const userPromise = getUser()
 
 function AuthProvider(props) {
   const {
@@ -36,14 +37,6 @@ function AuthProvider(props) {
   } = useAsync()
 
   React.useEffect(() => {
-    // we need to call getUser() sooner.
-    // 🐨 move the next line to just outside the AuthProvider
-    // 🦉 this means that as soon as this module is imported,
-    // it will start requesting the user's data so we don't
-    // have to wait until the app mounts before we kick off
-    // the request.
-    // We're moving from "Fetch on render" to "Render WHILE you fetch"!
-    const userPromise = getUser()
     run(userPromise)
   }, [run])
 
