@@ -61,15 +61,13 @@ test('allows for config overrides', async () => {
 test('when data is provided, it is stringified and the method defaults to POST', async () => {
   const endpoint = 'another'
   const data = {fruit: 'apple'}
-  let request
 
   server.use(
     rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
-      request = req
-      return res(ctx.json('bax'))
+      return res(ctx.json(req.body))
     }),
   )
 
-  await client(endpoint, {data})
-  expect(request.body).toStrictEqual(data)
+  const result = await client(endpoint, {data})
+  expect(result).toStrictEqual(data)
 })
