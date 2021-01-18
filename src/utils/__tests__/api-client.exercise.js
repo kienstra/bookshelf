@@ -1,5 +1,7 @@
+import {queryCache} from 'react-query'
 import {server, rest} from 'test/server'
 import {client} from '../api-client'
+import * as auth from 'auth-provider'
 
 const apiURL = process.env.REACT_APP_API_URL
 
@@ -70,4 +72,47 @@ test('when data is provided, it is stringified and the method defaults to POST',
 
   const result = await client(endpoint, {data})
   expect(result).toStrictEqual(data)
+})
+
+test('when the response is not ok, the promise is rejected with data', async () => {
+  const endpoint = 'baz'
+  const data = {message: 'There was an error'}
+
+  server.use(
+    rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+      return res(ctx.status(500), ctx.json(data))
+    }),
+  )
+
+  let error
+  try {
+    await client(endpoint, {data})
+  } catch (e) {
+    error = e
+  }
+
+  expect(error).toStrictEqual(data)
+})
+
+test('when the response is 401, the user is logged out and the query cache is cleared', async () => {
+  auth.logout = jest.fn()
+  queryCache.clear = jest.fn()
+
+  const endpoint = 'foo'
+  server.use(
+    rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+      return res(ctx.status(401), ctx.json({message: 'Unauthorized'}))
+    }),
+  )
+
+  let error
+  try {
+    await client(endpoint)
+  } catch (e) {
+    error = e
+  }
+
+  expect(auth.logout).toHaveBeenCalled()
+  expect(queryCache.clear).toHaveBeenCalled()
+  expect(error).toStrictEqual({message: 'Please re-authenticate.'})
 })
