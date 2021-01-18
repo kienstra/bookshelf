@@ -14,9 +14,12 @@ async function getUser() {
   const token = await auth.getToken()
   if (token) {
     data = await client('bootstrap', {token})
+    queryCache.setQueryData('list-items', data.listItems, {
+      staleTime: 5000,
+    })
   }
 
-  return data
+  return data?.user
 }
 
 const AuthContext = React.createContext()
@@ -25,7 +28,7 @@ const userPromise = getUser()
 
 function AuthProvider(props) {
   const {
-    data,
+    data: user,
     error,
     isLoading,
     isIdle,
@@ -38,13 +41,7 @@ function AuthProvider(props) {
 
   React.useEffect(() => {
     run(userPromise)
-      .then(data => {
-        if (data.listItems) {
-          queryCache.setQueryData('list-items', data.listItems)
-        }
-      })
   }, [run])
-  const user = data?.user
 
   const login = React.useCallback(
     form => auth.login(form).then(user => setData(user)),
