@@ -2,6 +2,7 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
+import { unstable_trace as trace } from "scheduler/tracing";
 import {
   FaCheckCircle,
   FaPlusCircle,
@@ -24,11 +25,13 @@ function TooltipButton({label, highlight, onClick, icon, ...rest}) {
   const {isLoading, isError, error, run, reset} = useAsync()
 
   function handleClick() {
-    if (isError) {
-      reset()
-    } else {
-      run(onClick())
-    }
+    trace('status buttons clicked', Date.now(), () => {
+      if (isError) {
+        reset()
+      } else {
+        run(onClick())
+      }
+    })
   }
 
   return (

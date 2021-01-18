@@ -57,6 +57,7 @@
     "prettier": "^2.2.1",
     "react-test-renderer": "^17.0.1",
     "resolve": "^1.19.0",
+    "scheduler": "^0.20.1",
     "serve": "^11.3.2",
     "start-server-and-test": "^1.11.6",
     "whatwg-fetch": "^3.5.0"

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import {unstable_wrap as wrap} from 'scheduler/tracing'
 
 function useSafeDispatch(dispatch) {
   const mounted = React.useRef(false)
@@ -81,4 +82,5 @@ function useAsync(initialState) {
   }
 }
 
-export {useAsync}
+const wrappedUseAsync = wrap(useAsync)
+export {wrappedUseAsync as useAsync}
