@@ -2,21 +2,21 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
+import {queryCache} from 'react-query'
 import * as auth from 'auth-provider'
 import {client} from 'utils/api-client'
 import {useAsync} from 'utils/hooks'
 import {FullPageSpinner, FullPageErrorFallback} from 'components/lib'
 
 async function getUser() {
-  let user = null
+  let data = null
 
   const token = await auth.getToken()
   if (token) {
-    const data = await client('me', {token})
-    user = data.user
+    data = await client('bootstrap', {token})
   }
 
-  return user
+  return data
 }
 
 const AuthContext = React.createContext()
@@ -25,7 +25,7 @@ const userPromise = getUser()
 
 function AuthProvider(props) {
   const {
-    data: user,
+    data,
     error,
     isLoading,
     isIdle,
@@ -38,7 +38,13 @@ function AuthProvider(props) {
 
   React.useEffect(() => {
     run(userPromise)
+      .then(data => {
+        if (data.listItems) {
+          queryCache.setQueryData('list-items', data.listItems)
+        }
+      })
   }, [run])
+  const user = data?.user
 
   const login = React.useCallback(
     form => auth.login(form).then(user => setData(user)),
