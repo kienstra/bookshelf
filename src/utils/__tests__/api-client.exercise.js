@@ -1,7 +1,10 @@
 import {queryCache} from 'react-query'
+import * as auth from 'auth-provider'
 import {server, rest} from 'test/server'
 import {client} from '../api-client'
-import * as auth from 'auth-provider'
+
+jest.mock('react-query')
+jest.mock('auth-provider')
 
 const apiURL = process.env.REACT_APP_API_URL
 
@@ -44,7 +47,7 @@ test('allows for config overrides', async () => {
     mode,
     headers: {
       'Accept-Encoding': acceptEncoding,
-    }
+    },
   }
   let request
 
@@ -84,18 +87,15 @@ test('when the response is not ok, the promise is rejected with data', async () 
     }),
   )
 
-  let error
-  try {
-    await client(endpoint, {data})
-  } catch (e) {
-    error = e
-  }
-
-  expect(error).toStrictEqual(data)
+  const result = await client(endpoint, {data}).catch(e => e)
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "There was an error",
+    }
+  `)
 })
 
 test('when the response is 401, the user is logged out and the query cache is cleared', async () => {
-  auth.logout = jest.fn()
   queryCache.clear = jest.fn()
 
   const endpoint = 'foo'
