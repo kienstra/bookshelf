@@ -79,20 +79,15 @@ test('when data is provided, it is stringified and the method defaults to POST',
 
 test('when the response is not ok, the promise is rejected with data', async () => {
   const endpoint = 'baz'
-  const data = {message: 'There was an error'}
+  const testError = {message: 'There was an error'}
 
   server.use(
     rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
-      return res(ctx.status(500), ctx.json(data))
+      return res(ctx.status(500), ctx.json(testError))
     }),
   )
 
-  const result = await client(endpoint, {data}).catch(e => e)
-  expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "There was an error",
-    }
-  `)
+  await expect(client(endpoint, {data: testError})).rejects.toEqual(testError)
 })
 
 test('when the response is 401, the user is logged out and the query cache is cleared', async () => {
@@ -104,15 +99,13 @@ test('when the response is 401, the user is logged out and the query cache is cl
       return res(ctx.status(401), ctx.json({message: 'Unauthorized'}))
     }),
   )
-
-  let error
-  try {
-    await client(endpoint)
-  } catch (e) {
-    error = e
-  }
+  const result = await client(endpoint).catch(e => e)
 
   expect(auth.logout).toHaveBeenCalled()
   expect(queryCache.clear).toHaveBeenCalled()
-  expect(error).toStrictEqual({message: 'Please re-authenticate.'})
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Please re-authenticate.",
+    }
+  `)
 })
