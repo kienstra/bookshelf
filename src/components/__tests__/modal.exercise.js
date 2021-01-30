@@ -27,7 +27,7 @@ test('can be opened and closed', async () => {
 
   expect(modal).toHaveAttribute('aria-label', ariaLabel)
   expect(inModal.getByRole('heading', {name: title})).toBeInTheDocument()
-  screen.getByText(contents)
+  expect(inModal.getByText(contents)).toBeInTheDocument()
 
   // After clicking to close, the modal contents should not be rendered.
   userEvent.click(inModal.getByRole('button', {name: /close/i}))
