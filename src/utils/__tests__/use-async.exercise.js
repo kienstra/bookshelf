@@ -9,21 +9,40 @@ afterEach(() => {
   console.error.mockRestore()
 })
 
-function getAsyncState(overrides = {}) {
-  return {
-    isIdle: true,
-    isLoading: false,
-    isError: false,
-    isSuccess: false,
-    setData: expect.any(Function),
-    setError: expect.any(Function),
-    error: null,
-    status: 'idle',
-    data: null,
-    run: expect.any(Function),
-    reset: expect.any(Function),
-    ...overrides
-  }
+const defaultState = {
+  isIdle: true,
+  isLoading: false,
+  isError: false,
+  isSuccess: false,
+  setData: expect.any(Function),
+  setError: expect.any(Function),
+  error: null,
+  status: 'idle',
+  data: null,
+  run: expect.any(Function),
+  reset: expect.any(Function),
+}
+
+const pendingState = {
+  ...defaultState,
+  status: 'pending',
+  isIdle: false,
+  isLoading: true,
+}
+
+const resolvedState = {
+  ...defaultState,
+  status: 'resolved',
+  isIdle: false,
+  isSuccess: true,
+}
+
+const rejectedState = {
+  ...defaultState,
+  status: 'rejected',
+  isIdle: false,
+  isError: true,
+  isSuccess: false,
 }
 
 function deferred() {
@@ -39,20 +58,14 @@ test('calling run with a promise which resolves', async () => {
   const {promise, resolve} = deferred()
   const {result} = renderHook(() => useAsync())
 
-  expect(result.current).toEqual(getAsyncState())
+  expect(result.current).toEqual(defaultState)
 
   let p
   act(() => {
     p = result.current.run(promise)
   })
 
-  expect(result.current).toEqual(
-    getAsyncState({
-      isIdle: false,
-      isLoading: true,
-      status: 'pending',
-    })
-  )
+  expect(result.current).toEqual(pendingState)
 
   const resolvedValue = Symbol('resolved value')
   await act(async () => {
@@ -60,20 +73,16 @@ test('calling run with a promise which resolves', async () => {
     await p
   })
 
-  expect(result.current).toEqual(
-    getAsyncState({
-      data: resolvedValue,
-      isIdle:false,
-      isSuccess: true,
-      status: 'resolved',
-    })
-  )
+  expect(result.current).toEqual({
+    ...resolvedState,
+    data: resolvedValue,
+  })
 
   act(() => {
     result.current.reset()
   })
 
-  expect(result.current).toEqual(getAsyncState())
+  expect(result.current).toEqual(defaultState)
 })
 
 test('calling run with a promise which rejects', async () => {
@@ -88,16 +97,10 @@ test('calling run with a promise which rejects', async () => {
     reject(rejectedValue)
   })
 
-  expect(result.current).toEqual(
-    getAsyncState({
-      isIdle: false,
-      isError: true,
-      isSuccess: false,
-      error: rejectedValue,
-      status: 'rejected',
-      data: null,
-    })
-  )
+  expect(result.current).toEqual({
+    ...rejectedState,
+    error: rejectedValue,
+  })
 })
 
 test('can specify an initial state', () => {
@@ -108,13 +111,12 @@ test('can specify an initial state', () => {
   }
   const {result} = renderHook(() => useAsync(initialState))
 
-  expect(result.current).toEqual(
-    getAsyncState({
-      isIdle: false,
-      isSuccess: true,
-      ...initialState
-    })
-  )
+  expect(result.current).toEqual({
+    ...defaultState,
+    isIdle: false,
+    isSuccess: true,
+    ...initialState
+  })
 })
 
 test('can set the data', async () => {
@@ -125,14 +127,10 @@ test('can set the data', async () => {
     result.current.setData(resolvedValue)
   })
 
-  expect(result.current).toEqual(
-    getAsyncState({
-      isIdle: false,
-      isSuccess: true,
-      data: resolvedValue,
-      status: 'resolved',
-    })
-  )
+  expect(result.current).toEqual({
+    ...resolvedState,
+    data: resolvedValue,
+  })
 })
 
 test('can set the error', async () => {
@@ -143,14 +141,10 @@ test('can set the error', async () => {
     result.current.setError(rejectedValue)
   })
 
-  expect(result.current).toEqual(
-    getAsyncState({
-      isError: true,
-      isIdle: false,
-      status: 'rejected',
-      error: rejectedValue,
-    })
-  )
+  expect(result.current).toEqual({
+    ...rejectedState,
+    error: rejectedValue,
+  })
 })
 
 test('No state updates happen if the component is unmounted while pending', async () => {
