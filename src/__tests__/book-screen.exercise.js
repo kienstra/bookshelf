@@ -1,17 +1,56 @@
-// 🐨 here are the things you're going to need for this test:
-// import * as React from 'react'
-// import {render, screen, waitFor} from '@testing-library/react'
-// import {queryCache} from 'react-query'
-// import {buildUser, buildBook} from 'test/generate'
-// import * as auth from 'auth-provider'
-// import {AppProviders} from 'context'
-// import {App} from 'app'
+import * as React from 'react'
+import {render, screen, waitFor} from '@testing-library/react'
+import {queryCache} from 'react-query'
+import {buildUser, buildBook} from 'test/generate'
+import * as auth from 'auth-provider'
+import {AppProviders} from 'context'
+import {App} from 'app'
 
-// 🐨 after each test, clear the queryCache and auth.logout
+afterEach(() => {
+  queryCache.clear()
+})
 
-test.todo('renders all the book information')
+test('renders all the book information', async () => {
+  const localStorageToken = 'something'
+  window.localStorage.setItem(auth.localStorageKey, localStorageToken)
+
+  const user = buildUser()
+  const book = buildBook()
+  window.history.pushState({}, 'page title', `book/${book.id}`)
+
+  window.fetch = jest.fn( async (url, config) => {
+    return {
+      ok: true,
+      json: async () => {
+        if (url.match(/bootstrap$/)) {
+          return {user, listItems: []}
+        } else if (url.match(/\/me$/)) {
+          return {user}
+        } else if (url.match(/\/list-items$/)) {
+          return {listItems: []}
+        } else if (url.match(RegExp(`/books/${book.id}$`, 'g'))) {
+          return {book}
+        }
+      }
+    }
+  })
+
+  render(
+    <AppProviders>
+      <App />
+    </AppProviders>
+  )
+
+  await waitFor(() => {
+    expect(screen.getByText(user.username)).toBeInTheDocument()
+    expect(screen.getByText(book.title)).toBeInTheDocument()
+    expect(screen.getByText(book.author)).toBeInTheDocument()
+    expect(screen.getByText(book.synopsis)).toBeInTheDocument()
+    expect(screen.getByText(book.publisher)).toBeInTheDocument()
+  })
+})
+
 // 🐨 "authenticate" the client by setting the auth.localStorageKey in localStorage to some string value (can be anything for now)
-
 // 🐨 create a user using `buildUser`
 // 🐨 create a book use `buildBook`
 // 🐨 update the URL to `/book/${book.id}`
