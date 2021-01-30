@@ -1,10 +1,35 @@
-// 🐨 you're gonna need this stuff:
-// import {Modal, ModalContents, ModalOpenButton} from '../modal'
+import * as React from 'react'
+import {render, screen, within} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import {Modal, ModalContents, ModalOpenButton} from 'components/modal'
+import {Button} from 'components/lib'
 
-test.todo('can be opened and closed')
-// 🐨 render the Modal, ModalOpenButton, and ModalContents
-// 🐨 click the open button
-// 🐨 verify the modal contains the modal contents, title, and label
-// 🐨 click the close button
-// 🐨 verify the modal is no longer rendered
-// 💰 (use `query*` rather than `get*` or `find*` queries to verify it is not rendered)
+test('can be opened and closed', async () => {
+  const title = 'Login here'
+  const ariaLabel = 'Modal label'
+  const contents = 'Example contents'
+
+  render(
+    <Modal>
+      <ModalOpenButton>
+        <Button>Open</Button>
+      </ModalOpenButton>
+      <ModalContents aria-label={ariaLabel} title={title}>
+        {contents}
+      </ModalContents>
+    </Modal>
+  )
+
+  // After clicking to open the modal, the contents should be rendered.
+  userEvent.click(screen.getByRole('button', {name: /open/i}))
+  const modal = screen.getByRole('dialog')
+  const inModal = within(modal)
+
+  expect(modal).toHaveAttribute('aria-label', ariaLabel)
+  expect(inModal.getByRole('heading', {name: title})).toBeInTheDocument()
+  screen.getByText(contents)
+
+  // After clicking to close, the modal contents should not be rendered.
+  userEvent.click(inModal.getByRole('button', {name: /close/i}))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+})
