@@ -21,8 +21,8 @@ afterEach(async () => {
   ])
 })
 
-async function loginUser() {
-  const user = buildUser()
+async function loginUser(userProperties) {
+  const user = buildUser(userProperties)
   await usersDB.create(user)
   const authUser = await usersDB.authenticate(user)
   window.localStorage.setItem(auth.localStorageKey, authUser.token)
@@ -39,12 +39,10 @@ async function render() {
   return book
 }
 
-async function waitForLoadingToFinish() {
-  await waitForElementToBeRemoved(() => [
-    ...screen.queryAllByLabelText(/loading/i),
-    ...screen.queryAllByText(/loading/i),
-  ])
-}
+const waitForLoadingToFinish = () => waitForElementToBeRemoved(() => [
+  ...screen.queryAllByLabelText(/loading/i),
+  ...screen.queryAllByText(/loading/i),
+])
 
 test('renders all the book information', async () => {
   const user = await loginUser()
