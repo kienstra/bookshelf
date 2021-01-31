@@ -7,6 +7,7 @@ import * as booksDB from 'test/data/books'
 import * as listItemsDB from 'test/data/list-items'
 import * as auth from 'auth-provider'
 import {buildUser, buildBook} from 'test/generate'
+import {formatDate} from 'utils/misc'
 import {AppProviders} from 'context'
 import {App} from 'app'
 
@@ -81,14 +82,20 @@ test('can create a list item for the book', async () => {
     ...screen.queryAllByText(/loading/i),
   ])
 
-  userEvent.click(screen.getByRole('button', {name: /add to list/i}))
-  await waitForElementToBeRemoved(() => screen.queryByRole(
-    'button',
-    {name: /add to list/i}
-  ))
+  const addToListButton = screen.getByRole('button', {name: /add to list/i})
+  userEvent.click(addToListButton)
+  expect(addToListButton).toBeDisabled()
+  await waitForElementToBeRemoved(() => [
+    ...screen.queryAllByLabelText(/loading/i),
+    ...screen.queryAllByText(/loading/i),
+  ])
 
-  expect(screen.getByLabelText(/start date/i)).toBeInTheDocument()
-  expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
   expect(screen.getByRole('button', {name: /mark as read/i})).toBeInTheDocument()
+  expect(screen.queryByRole('button', {name: /mark as unread/i})).not.toBeInTheDocument()
   expect(screen.getByRole('button', {name: /remove from list/i})).toBeInTheDocument()
+  expect(screen.queryByRole('button',{name: /add to list/i})).not.toBeInTheDocument()
+
+  expect(screen.getByLabelText(/start date/i)).toHaveTextContent(formatDate(new Date()))
+  expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
+  expect(screen.queryByRole('radio',{name: /star/i})).not.toBeInTheDocument()
 })
