@@ -21,7 +21,7 @@ afterEach(async () => {
   ])
 })
 
-async function loginUser(userProperties) {
+async function loginAsUser(userProperties) {
   const user = buildUser(userProperties)
   await usersDB.create(user)
   const authUser = await usersDB.authenticate(user)
@@ -30,13 +30,13 @@ async function loginUser(userProperties) {
   return user
 }
 
-async function render() {
-  const book = await booksDB.create(buildBook())
-  const route = `/book/${book.id}`
-  window.history.pushState({}, 'Test page', route)
-  renderComponent(<App />, {wrapper: AppProviders})
+async function render(ui, {route = '/list', user, ...renderOptions }= {}) {
+  user = typeof user === 'undefined' ? await loginAsUser() : user
 
-  return book
+  window.history.pushState({}, 'Test page', route)
+  const rendered = renderComponent(ui, {wrapper: AppProviders, ...renderOptions})
+  await waitForLoadingToFinish()
+  return {...rendered, user}
 }
 
 const waitForLoadingToFinish = () => waitForElementToBeRemoved(() => [
@@ -45,9 +45,9 @@ const waitForLoadingToFinish = () => waitForElementToBeRemoved(() => [
 ])
 
 test('renders all the book information', async () => {
-  const user = await loginUser()
-  const book = await render()
-  await waitForLoadingToFinish()
+  const book = await booksDB.create(buildBook())
+  const route = `/book/${book.id}`
+  const {user} = await render(<App />, {route})
 
   expect(screen.getByText(user.username)).toBeInTheDocument()
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
@@ -77,9 +77,9 @@ test('renders all the book information', async () => {
 })
 
 test('can create a list item for the book', async () => {
-  await loginUser()
-  await render()
-  await waitForLoadingToFinish()
+  const book = await booksDB.create(buildBook())
+  const route = `/book/${book.id}`
+  await render(<App />, {route})
 
   const addToListButton = screen.getByRole('button', {name: /add to list/i})
   userEvent.click(addToListButton)
