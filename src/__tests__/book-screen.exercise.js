@@ -1,75 +1,64 @@
 import * as React from 'react'
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import {queryCache} from 'react-query'
-import {buildUser, buildBook} from 'test/generate'
+import * as usersDB from 'test/data/users'
+import * as booksDB from 'test/data/books'
+import * as listItemsDB from 'test/data/list-items'
 import * as auth from 'auth-provider'
+import {buildUser, buildBook} from 'test/generate'
 import {AppProviders} from 'context'
 import {App} from 'app'
 
-afterEach(() => {
+afterEach(async () => {
   queryCache.clear()
+  await Promise.all([
+    auth.logout(),
+    usersDB.reset(),
+    booksDB.reset(),
+    listItemsDB.reset(),
+  ])
 })
 
 test('renders all the book information', async () => {
-  const localStorageToken = 'something'
-  window.localStorage.setItem(auth.localStorageKey, localStorageToken)
-
   const user = buildUser()
-  const book = buildBook()
-  window.history.pushState({}, 'page title', `book/${book.id}`)
+  await usersDB.create(user)
+  const authUser = await usersDB.authenticate(user)
+  window.localStorage.setItem(auth.localStorageKey, authUser.token)
 
-  window.fetch = jest.fn( async (url, config) => {
-    return {
-      ok: true,
-      json: async () => {
-        if (url.match(/bootstrap$/)) {
-          return {user, listItems: []}
-        } else if (url.match(/\/me$/)) {
-          return {user}
-        } else if (url.match(/\/list-items$/)) {
-          return {listItems: []}
-        } else if (url.match(RegExp(`/books/${book.id}$`, 'g'))) {
-          return {book}
-        }
-      }
-    }
-  })
+  const book = await booksDB.create(buildBook())
+  const route = `/book/${book.id}`
 
-  render(
-    <AppProviders>
-      <App />
-    </AppProviders>
+  window.history.pushState({}, 'Test page', route)
+
+  render(<App />, {wrapper: AppProviders})
+  await waitForElementToBeRemoved(() => [
+    ...screen.queryAllByLabelText(/loading/i),
+    ...screen.queryAllByText(/loading/i),
+  ])
+
+  expect(screen.getByText(user.username)).toBeInTheDocument()
+  expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
+  expect(screen.getByText(book.author)).toBeInTheDocument()
+  expect(screen.getByText(book.publisher)).toBeInTheDocument()
+  expect(screen.getByText(book.synopsis)).toBeInTheDocument()
+  expect(screen.getByRole('img', {name: /book cover/i})).toHaveAttribute(
+    'src',
+    book.coverImageUrl
   )
 
-  await waitFor(() => {
-    expect(screen.getByText(user.username)).toBeInTheDocument()
-    expect(screen.getByText(book.title)).toBeInTheDocument()
-    expect(screen.getByText(book.author)).toBeInTheDocument()
-    expect(screen.getByText(book.synopsis)).toBeInTheDocument()
-    expect(screen.getByText(book.publisher)).toBeInTheDocument()
-  })
+  expect(screen.getByRole('button', {name: /add to list/i})).toBeInTheDocument()
+  expect(
+    screen.queryByRole('button', {name: /remove from list/i}),
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByRole('button', {name: /mark as read/i}),
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByRole('button', {name: /mark as unread/i}),
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByRole('textbox', {name: /notes/i}),
+  ).not.toBeInTheDocument()
+  expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument()
+  expect(screen.queryByLabelText(/start date/i)).not.toBeInTheDocument()
 })
-
-// 🐨 "authenticate" the client by setting the auth.localStorageKey in localStorage to some string value (can be anything for now)
-// 🐨 create a user using `buildUser`
-// 🐨 create a book use `buildBook`
-// 🐨 update the URL to `/book/${book.id}`
-//   💰 window.history.pushState({}, 'page title', route)
-//   📜 https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-
-// 🐨 reassign window.fetch to another function and handle the following requests:
-// - url ends with `/me`: respond with {user}
-// - url ends with `/list-items`: respond with {listItems: []}
-// - url ends with `/books/${book.id}`: respond with {book}
-// 💰 window.fetch = async (url, config) => { /* handle stuff here*/ }
-// 💰 return Promise.resolve({ok: true, json: async () => ({ /* response data here */ })})
-
-// 🐨 render the App component and set the wrapper to the AppProviders
-// (that way, all the same providers we have in the app will be available in our tests)
-
-// 🐨 use waitFor to wait for the queryCache to stop fetching and the loading
-// indicators to go away
-// 📜 https://testing-library.com/docs/dom-testing-library/api-async#waitfor
-// 💰 if (queryCache.isFetching or there are loading indicators) then throw an error...
-
-// 🐨 assert the book's info is in the document
