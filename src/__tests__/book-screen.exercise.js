@@ -1,52 +1,10 @@
 import * as React from 'react'
-import {render as renderComponent, screen, waitForElementToBeRemoved} from '@testing-library/react'
+import{render, screen, waitForLoadingToFinish} from 'test/app-test-utils'
 import userEvent from '@testing-library/user-event'
-import {queryCache} from 'react-query'
-import * as usersDB from 'test/data/users'
 import * as booksDB from 'test/data/books'
-import * as listItemsDB from 'test/data/list-items'
-import * as auth from 'auth-provider'
-import {buildUser, buildBook} from 'test/generate'
+import {buildBook} from 'test/generate'
 import {formatDate} from 'utils/misc'
-import {AppProviders} from 'context'
 import {App} from 'app'
-
-afterEach(async () => {
-  queryCache.clear()
-  await Promise.all([
-    auth.logout(),
-    usersDB.reset(),
-    booksDB.reset(),
-    listItemsDB.reset(),
-  ])
-})
-
-async function loginAsUser(userProperties) {
-  const user = buildUser(userProperties)
-  await usersDB.create(user)
-  const authUser = await usersDB.authenticate(user)
-  window.localStorage.setItem(auth.localStorageKey, authUser.token)
-
-  return user
-}
-
-async function render(ui, {route = '/list', user, ...renderOptions }= {}) {
-  user = typeof user === 'undefined' ? await loginAsUser() : user
-
-  window.history.pushState({}, 'Test page', route)
-  const returnValue = {
-    ...renderComponent(ui, {wrapper: AppProviders, ...renderOptions}),
-    user,
-  }
-  await waitForLoadingToFinish()
-
-  return returnValue
-}
-
-const waitForLoadingToFinish = () => waitForElementToBeRemoved(() => [
-  ...screen.queryAllByLabelText(/loading/i),
-  ...screen.queryAllByText(/loading/i),
-])
 
 test('renders all the book information', async () => {
   const book = await booksDB.create(buildBook())
