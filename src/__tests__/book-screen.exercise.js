@@ -34,9 +34,13 @@ async function render(ui, {route = '/list', user, ...renderOptions }= {}) {
   user = typeof user === 'undefined' ? await loginAsUser() : user
 
   window.history.pushState({}, 'Test page', route)
-  const rendered = renderComponent(ui, {wrapper: AppProviders, ...renderOptions})
+  const returnValue = {
+    ...renderComponent(ui, {wrapper: AppProviders, ...renderOptions}),
+    user,
+  }
   await waitForLoadingToFinish()
-  return {...rendered, user}
+
+  return returnValue
 }
 
 const waitForLoadingToFinish = () => waitForElementToBeRemoved(() => [
