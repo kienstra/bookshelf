@@ -1,4 +1,5 @@
 import {render as renderComponent, screen, waitForElementToBeRemoved} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import {buildUser} from 'test/generate'
 import * as usersDB from 'test/data/users'
 import * as auth from 'auth-provider'
@@ -31,4 +32,5 @@ const waitForLoadingToFinish = () => waitForElementToBeRemoved(() => [
   ...screen.queryAllByText(/loading/i),
 ])
 
-export {render, screen, waitForLoadingToFinish}
+export * from '@testing-library/react'
+export {render, userEvent, loginAsUser, waitForLoadingToFinish}
