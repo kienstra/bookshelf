@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import {queryCache} from 'react-query'
 import * as usersDB from 'test/data/users'
 import * as booksDB from 'test/data/books'
@@ -61,4 +62,33 @@ test('renders all the book information', async () => {
   ).not.toBeInTheDocument()
   expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument()
   expect(screen.queryByLabelText(/start date/i)).not.toBeInTheDocument()
+})
+
+test('can create a list item for the book', async () => {
+  const user = buildUser()
+  await usersDB.create(user)
+  const authUser = await usersDB.authenticate(user)
+  window.localStorage.setItem(auth.localStorageKey, authUser.token)
+
+  const book = await booksDB.create(buildBook())
+  const route = `/book/${book.id}`
+
+  window.history.pushState({}, 'Test page', route)
+
+  render(<App />, {wrapper: AppProviders})
+  await waitForElementToBeRemoved(() => [
+    ...screen.queryAllByLabelText(/loading/i),
+    ...screen.queryAllByText(/loading/i),
+  ])
+
+  userEvent.click(screen.getByRole('button', {name: /add to list/i}))
+  await waitForElementToBeRemoved(() => screen.queryByRole(
+    'button',
+    {name: /add to list/i}
+  ))
+
+  expect(screen.getByLabelText(/start date/i)).toBeInTheDocument()
+  expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
+  expect(screen.getByRole('button', {name: /mark as read/i})).toBeInTheDocument()
+  expect(screen.getByRole('button', {name: /remove from list/i})).toBeInTheDocument()
 })
