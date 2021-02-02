@@ -85,6 +85,9 @@ test('can mark a list item as read', async () => {
   screen.getAllByRole('radio',{name: /star/i})
   expect(screen.queryByRole('button', {name: /mark as read/i})).not.toBeInTheDocument()
   expect(screen.queryByRole('button', {name: /mark as unread/i})).toBeInTheDocument()
+
+  const startAndFinishDateNode = screen.getByLabelText(/start and finish date/i)
+  expect(startAndFinishDateNode).toHaveTextContent(formatDate(Date.now()))
 })
 
 test('can edit a note', async () => {
