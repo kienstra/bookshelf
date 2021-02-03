@@ -6,10 +6,16 @@ import {buildBook} from 'test/generate'
 import {formatDate} from 'utils/misc'
 import {App} from 'app'
 
-test('renders all the book information', async () => {
-  const book = await booksDB.create(buildBook())
+async function renderBookScreen({user, book} = {}) {
+  book = typeof book === 'undefined' ? await booksDB.create(buildBook()) : book
   const route = `/book/${book.id}`
-  const {user} = await render(<App />, {route})
+  const renderResult = await render(<App />, {route, user})
+
+  return {...renderResult, book}
+}
+
+test('renders all the book information', async () => {
+  const {book, user} = await renderBookScreen()
 
   expect(screen.getByText(user.username)).toBeInTheDocument()
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
@@ -39,9 +45,7 @@ test('renders all the book information', async () => {
 })
 
 test('can create a list item for the book', async () => {
-  const book = await booksDB.create(buildBook())
-  const route = `/book/${book.id}`
-  await render(<App />, {route})
+  await renderBookScreen()
 
   const addToListButton = screen.getByRole('button', {name: /add to list/i})
   userEvent.click(addToListButton)
@@ -59,9 +63,7 @@ test('can create a list item for the book', async () => {
 })
 
 test('can remove a list item for the book', async () => {
-  const book = await booksDB.create(buildBook())
-  const route = `/book/${book.id}`
-  await render(<App />, {route})
+  await renderBookScreen()
 
   const addToListButton = screen.getByRole('button', {name: /add to list/i})
   userEvent.click(addToListButton)
@@ -73,9 +75,7 @@ test('can remove a list item for the book', async () => {
 })
 
 test('can mark a list item as read', async () => {
-  const book = await booksDB.create(buildBook())
-  const route = `/book/${book.id}`
-  await render(<App />, {route})
+  await renderBookScreen()
 
   userEvent.click(screen.getByRole('button', {name: /add to list/i}))
   await waitForLoadingToFinish()
@@ -93,9 +93,7 @@ test('can mark a list item as read', async () => {
 
 test('can edit a note', async () => {
   jest.useFakeTimers()
-  const book = await booksDB.create(buildBook())
-  const route = `/book/${book.id}`
-  await render(<App />, {route})
+  await renderBookScreen()
 
   userEvent.click(screen.getByRole('button', {name: /add to list/i}))
   await waitForLoadingToFinish()
