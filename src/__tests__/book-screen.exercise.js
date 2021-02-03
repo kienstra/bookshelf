@@ -1,5 +1,5 @@
 import * as React from 'react'
-import{render, screen, userEvent, waitForLoadingToFinish} from 'test/app-test-utils'
+import{loginAsUser, render, screen, userEvent, waitForLoadingToFinish} from 'test/app-test-utils'
 import * as booksDB from 'test/data/books'
 import faker from 'faker'
 import {buildBook} from 'test/generate'
@@ -8,6 +8,7 @@ import {App} from 'app'
 
 async function renderBookScreen({user, book} = {}) {
   book = typeof book === 'undefined' ? await booksDB.create(buildBook()) : book
+  user = typeof user === 'undefined' ? await loginAsUser() : user
   const route = `/book/${book.id}`
   const renderResult = await render(<App />, {route, user})
 

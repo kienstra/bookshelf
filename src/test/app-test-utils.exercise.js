@@ -15,8 +15,6 @@ async function loginAsUser(userProperties) {
 }
 
 async function render(ui, {route = '/list', user, ...renderOptions }= {}) {
-  user = typeof user === 'undefined' ? await loginAsUser() : user
-
   window.history.pushState({}, 'Test page', route)
   const returnValue = {
     ...renderComponent(ui, {wrapper: AppProviders, ...renderOptions}),
