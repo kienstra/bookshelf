@@ -1,6 +1,7 @@
 import * as React from 'react'
-import{render, screen, userEvent, waitForElementToBeRemoved, waitForLoadingToFinish} from 'test/app-test-utils'
+import{render, screen, userEvent, waitForLoadingToFinish} from 'test/app-test-utils'
 import * as booksDB from 'test/data/books'
+import faker from 'faker'
 import {buildBook} from 'test/generate'
 import {formatDate} from 'utils/misc'
 import {App} from 'app'
@@ -91,6 +92,7 @@ test('can mark a list item as read', async () => {
 })
 
 test('can edit a note', async () => {
+  jest.useFakeTimers()
   const book = await booksDB.create(buildBook())
   const route = `/book/${book.id}`
   await render(<App />, {route})
@@ -99,8 +101,12 @@ test('can edit a note', async () => {
   await waitForLoadingToFinish()
 
   const noteBox = screen.getByRole('textbox', {name: /notes/i})
-  const noteText = 'Here is an example note'
+  const noteText = faker.lorem.words()
+  userEvent.clear(noteBox)
   userEvent.type(noteBox, noteText)
+
+  await screen.findByLabelText(/loading/i)
+  await waitForLoadingToFinish()
 
   expect(noteBox).toHaveValue(noteText)
 })

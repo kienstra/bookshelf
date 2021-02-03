@@ -9,6 +9,7 @@ import * as usersDB from 'test/data/users'
 // enable API mocking in test runs using the same request handlers
 // as for the client-side mocking.
 beforeAll(() => server.listen())
+beforeEach(() => jest.useRealTimers())
 afterAll(() => server.close())
 afterEach(() => server.resetHandlers())
 
