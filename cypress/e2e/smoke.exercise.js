@@ -12,17 +12,26 @@ describe('smoke', () => {
       cy.findByRole('button', {name: /register/i}).click()
     })
 
-    cy.findByRole('link', {name: 'Discover'}).click()
+    cy.findByRole('navigation').within(() => {
+      cy.findByRole('link', {name: 'Discover'}).click()
+    })
 
     const bookTitle = 'Voice of War'
     cy.findByRole('main').within(() => {
-      cy.findByRole('searchbox').type(`${bookTitle}{enter}`)
-      cy.findByRole('button', {name: /add to list/i}).click()
+      cy.findByRole('searchbox', {name: /search/i}).type(`${bookTitle}{enter}`)
+      cy.findByRole('listitem').within(() => {
+        cy.findByRole('button', {name: /add to list/i}).click()
+      })
     })
 
-    cy.findByRole('link', {name: 'Reading List'}).click()
-    cy.findByRole('main').should('have.length', 1)
-    cy.findByRole('link', {name: bookTitle}).click()
+    cy.findByRole('navigation').within(() => {
+      cy.findByRole('link', {name: 'Reading List'}).click()
+    })
+
+    cy.findByRole('main').within(() => {
+      cy.findAllByRole('listitem').should('have.length', 1)
+      cy.findByRole('link', {name: bookTitle}).click()
+    })
 
     const notes = 'Here are some example notes'
     cy.findByRole('textbox', {name: /notes/i}).type(notes)
