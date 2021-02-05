@@ -34,27 +34,37 @@ describe('smoke', () => {
     })
 
     const notes = 'Here are some example notes'
-    cy.findByRole('textbox', {name: /notes/i}).type(notes)
-    cy.findByLabelText(/loading/i).should('exist')
-    cy.findByLabelText(/loading/i).should('not.exist')
-    cy.findByRole('button', {name: /mark as read/i}).click()
-    cy.findByLabelText(/5/).click({force: true})
-    cy.findByRole('button', {name: /mark as unread/i}).should('exist')
-    cy.findByRole('link', {name: 'Finished Books'}).click()
+    cy.findByRole('main').within(() => {
+      cy.findByRole('textbox', {name: /notes/i}).type(notes)
+      cy.findByLabelText(/loading/i).should('exist')
+      cy.findByLabelText(/loading/i).should('not.exist')
+      cy.findByRole('button', {name: /mark as read/i}).click()
+      cy.findByLabelText(/5 stars/).click({force: true})
+      cy.findByRole('button', {name: /mark as unread/i}).should('exist')
+    })
+
+    cy.findByRole('navigation').within(() => {
+      cy.findByRole('link', {name: 'Finished Books'}).click()
+    })
 
     cy.findByRole('main').within(() => {
       cy.findByRole('listitem').should('have.length', 1)
+      cy.findByLabelText(/5/).should('be.checked')
+      cy.findByRole('link', {name: bookTitle}).click()
     })
-    cy.findByLabelText(/5/).should('be.checked')
-
-    cy.findByRole('link', {name: bookTitle}).click()
-    cy.findByRole('button', {name: /remove from list/i}).click()
-    cy.findByRole('textbox', {name: /notes/i}).should('not.exist')
-    cy.findByRole('radio', {name: /stars/i}).should('not.exist')
-    cy.findByRole('link', {name: 'Finished Books'}).click()
 
     cy.findByRole('main').within(() => {
-      cy.findByRole('listitem').should('not.exist')
+      cy.findByRole('button', {name: /remove from list/i}).click()
+      cy.findByRole('textbox', {name: /notes/i}).should('not.exist')
+      cy.findByRole('radio', {name: /5 stars/i}).should('not.exist')
+    })
+
+    cy.findByRole('navigation').within(() => {
+      cy.findByRole('link', {name: /finished books/i}).click()
+    })
+
+    cy.findByRole('main').within(() => {
+      cy.findByRole('listitem').should('have.length', 0)
     })
   })
 })
